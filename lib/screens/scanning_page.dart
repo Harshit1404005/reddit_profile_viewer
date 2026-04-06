@@ -165,18 +165,14 @@ class _ScanningPageState extends State<ScanningPage> {
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.onSurfaceVariant),
                         ),
                         const SizedBox(height: 64),
-                        
-                        // Animated Progress Steps
-                        _buildProgressStep(context, 'Analyzing profile data...', 0.2),
-                        _buildProgressStep(context, 'Gathering history...', 0.5),
-                        _buildProgressStep(context, 'Finalizing results...', 0.8),
+                        const SizedBox(height: 16),
                         
                         const SizedBox(height: 48),
                         
                         // Step List
                         _buildStatusStep(
                           context, 
-                          'Identity Resolution', 
+                          'Analyzing Profile Data', 
                           _profileComplete ? 'Complete' : (_progress < 0.6 ? 'Active' : 'Complete'), 
                           AppTheme.tertiary, 
                           _profileComplete, 
@@ -185,7 +181,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         const SizedBox(height: 12),
                         _buildStatusStep(
                           context, 
-                          'Behavioral Mapping', 
+                          'Gathering History', 
                           _activityComplete ? 'Complete' : (_progress >= 0.6 && _progress < 0.9 ? 'Active' : 'Queued'), 
                           AppTheme.primary, 
                           _activityComplete, 
@@ -194,7 +190,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         const SizedBox(height: 12),
                         _buildStatusStep(
                           context, 
-                          'Neural Synthesis', 
+                          'Finalizing Results', 
                           _analysisComplete ? 'Complete' : (_progress >= 0.9 ? 'Active' : 'Queued'), 
                           AppTheme.secondary, 
                           _analysisComplete, 
