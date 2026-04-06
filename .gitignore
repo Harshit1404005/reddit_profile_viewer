@@ -1,4 +1,7 @@
 # Miscellaneous
+.env
+.env.template
+analysis_output.txt
 *.class
 *.log
 *.pyc
