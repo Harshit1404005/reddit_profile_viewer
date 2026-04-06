@@ -20,6 +20,7 @@ class _DashboardPageState extends State<DashboardPage> {
   late RedditProfile? _currentProfile;
   bool _isLoadingMore = false;
   final RedditService _service = RedditService.create();
+  int _timelineTabIndex = 0;
 
   @override
   void initState() {
@@ -53,15 +54,14 @@ class _DashboardPageState extends State<DashboardPage> {
     final bool hasData = _currentProfile != null;
     
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
-        child: GlassPanel(
-          borderRadius: 0,
-          blur: 16,
+        child: Container(
+          color: AppTheme.surface,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: AppBar(
-            backgroundColor: Colors.transparent,
+            backgroundColor: AppTheme.surface,
             elevation: 0,
             leading: MediaQuery.of(context).size.width < 600
                 ? IconButton(
@@ -311,30 +311,68 @@ class _DashboardPageState extends State<DashboardPage> {
                 // Content Timeline
                 Text('CONTENT TIMELINE', style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 24),
+                
                 if (hasData && (_currentProfile!.recentPosts.isNotEmpty || _currentProfile!.recentComments.isNotEmpty))
-                  ...[
-                    ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post.subreddit, post.time, post.title, post.ups, post.numComments, AppTheme.primary)),
-                    ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
-                    
-                    if (_currentProfile!.afterToken != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Center(
-                          child: OutlinedButton.icon(
-                            onPressed: _isLoadingMore ? null : _loadMore,
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                              side: BorderSide(color: AppTheme.primary.withOpacity(0.5)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Custom Tabs
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _timelineTabIndex = 0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: _timelineTabIndex == 0 ? AppTheme.primary : AppTheme.outlineVariant, width: 2)),
+                                ),
+                                child: Center(child: Text('POSTS (${_currentProfile!.recentPosts.length})', style: TextStyle(color: _timelineTabIndex == 0 ? AppTheme.primary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
+                              ),
                             ),
-                            icon: _isLoadingMore 
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const FaIcon(FontAwesomeIcons.plus, size: 14),
-                            label: Text(_isLoadingMore ? 'SYNCHRONIZING...' : 'EXTEND ANALYSIS', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _timelineTabIndex = 1),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(color: _timelineTabIndex == 1 ? AppTheme.secondary : AppTheme.outlineVariant, width: 2)),
+                                ),
+                                child: Center(child: Text('COMMENTS (${_currentProfile!.recentComments.length})', style: TextStyle(color: _timelineTabIndex == 1 ? AppTheme.secondary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      
+                      // Content
+                      if (_timelineTabIndex == 0)
+                        ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post.subreddit, post.time, post.title, post.ups, post.numComments, AppTheme.primary)),
+                      if (_timelineTabIndex == 1)
+                        ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
+                        
+                      if (_currentProfile!.afterToken != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          child: Center(
+                            child: OutlinedButton.icon(
+                              onPressed: _isLoadingMore ? null : _loadMore,
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                side: BorderSide(color: AppTheme.primary.withOpacity(0.5)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              icon: _isLoadingMore 
+                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const FaIcon(FontAwesomeIcons.plus, size: 14),
+                              label: Text(_isLoadingMore ? 'SYNCHRONIZING...' : 'EXTEND ANALYSIS', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+                            ),
                           ),
                         ),
-                      ),
-                  ]
+                    ],
+                  )
                 else
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 48),
@@ -414,19 +452,28 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           const Spacer(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              12,
-              (index) => Container(
-                width: 32,
-                height: (20 + (index * 15) % 100).toDouble(),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [AppTheme.primaryContainer.withAlpha(50), AppTheme.primary]),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                ),
-              ).animate().scaleY(delay: (400 + index * 50).ms, begin: 0, end: 1),
+          SizedBox(
+            height: 150,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double spacing = 8.0;
+                final barWidth = (constraints.maxWidth - (11 * spacing)) / 12;
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(
+                    12,
+                    (index) => Container(
+                      width: barWidth > 0 ? barWidth : 10,
+                      height: (20 + (index * 15) % 100).toDouble(),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [AppTheme.primaryContainer.withAlpha(50), AppTheme.primary]),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                      ),
+                    ).animate().scaleY(delay: (400 + index * 50).ms, begin: 0, end: 1),
+                  ),
+                );
+              }
             ),
           ),
         ],
