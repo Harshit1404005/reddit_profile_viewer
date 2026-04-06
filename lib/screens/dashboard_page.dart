@@ -293,7 +293,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Text('CONTENT TIMELINE', style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 24),
                 
-                if (hasData && (_currentProfile!.recentPosts.isNotEmpty || _currentProfile!.recentComments.isNotEmpty))
+                if (hasData)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -334,6 +334,11 @@ class _DashboardPageState extends State<DashboardPage> {
                       if (_timelineTabIndex == 1)
                         ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
                         
+                      if (_timelineTabIndex == 0 && _currentProfile!.recentPosts.isEmpty)
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO RECENT POSTS DETECTED', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
+                      if (_timelineTabIndex == 1 && _currentProfile!.recentComments.isEmpty)
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO RECENT COMMENTS DETECTED', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
+                        
                       if (_currentProfile!.afterToken != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 32),
@@ -357,7 +362,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 else
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 48),
-                    child: Center(child: Text('NO RECENT CONTENT DETECTED', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2))),
+                    child: Center(child: Text('SEARCHING...', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2))),
                   ),
               ],
             ),
