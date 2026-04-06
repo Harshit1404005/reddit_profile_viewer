@@ -65,8 +65,8 @@ class _DashboardPageState extends State<DashboardPage> {
             elevation: 0,
             leading: MediaQuery.of(context).size.width < 600
                 ? IconButton(
-                    icon: const FaIcon(FontAwesomeIcons.bars, size: 18, color: AppTheme.primary),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const FaIcon(FontAwesomeIcons.arrowLeft, size: 18, color: AppTheme.primary),
+                    onPressed: () => widget.onReset(),
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +84,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
             title: Text(
-              'RedditScope',
+              'RedIntel',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
             ),
             actions: MediaQuery.of(context).size.width < 600
@@ -106,25 +106,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      drawer: MediaQuery.of(context).size.width < 600 
-        ? Drawer(
-            backgroundColor: AppTheme.surface,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: const BoxDecoration(color: AppTheme.surfaceContainer),
-                  child: Center(
-                    child: Text('REDDIT_SCOPE', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
-                  ),
-                ),
-                ListTile(title: const Text('Home'), leading: const FaIcon(FontAwesomeIcons.house, size: 16), onTap: () {}),
-                ListTile(title: const Text('History'), leading: const FaIcon(FontAwesomeIcons.clockRotateLeft, size: 16), onTap: () {}),
-                ListTile(title: const Text('Settings'), leading: const FaIcon(FontAwesomeIcons.gear, size: 16), onTap: () {}),
-              ],
-            ),
-          )
-        : null,
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -288,9 +269,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          FaIcon(FontAwesomeIcons.shieldHalved, color: AppTheme.tertiary),
+                          FaIcon(FontAwesomeIcons.triangleExclamation, color: AppTheme.tertiary),
                           const SizedBox(width: 16),
-                          Text('RISK ASSESSMENT PROFILE', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 14)),
+                          Text('USER FLAG WARNINGS', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 14)),
                         ],
                       ),
                       Wrap(
@@ -367,7 +348,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               icon: _isLoadingMore 
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                                 : const FaIcon(FontAwesomeIcons.plus, size: 14),
-                              label: Text(_isLoadingMore ? 'SYNCHRONIZING...' : 'EXTEND ANALYSIS', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+                              label: Text(_isLoadingMore ? 'LOADING...' : 'LOAD MORE ACTIVITY', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ),
@@ -448,7 +429,7 @@ class _DashboardPageState extends State<DashboardPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Activity Distribution', style: Theme.of(context).textTheme.titleLarge),
-              Text('STOCHASTIC MAPPING', style: Theme.of(context).textTheme.labelSmall),
+              Text('ACTIVITY TRENDS', style: Theme.of(context).textTheme.labelSmall),
             ],
           ),
           const Spacer(),
@@ -494,9 +475,9 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Row(
             children: [
-              FaIcon(FontAwesomeIcons.microchip, color: AppTheme.primary, size: 16),
+              FaIcon(FontAwesomeIcons.userCheck, color: AppTheme.primary, size: 16),
               const SizedBox(width: 8),
-              Text('INTELLIGENCE SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
+              Text('USER BEHAVIOR SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
             ],
           ),
           const SizedBox(height: 16),
@@ -536,7 +517,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sector Mapping', style: Theme.of(context).textTheme.titleLarge),
+          Text('Top Communities', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 24),
           Center(
             child: Stack(

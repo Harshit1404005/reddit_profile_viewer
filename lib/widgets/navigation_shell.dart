@@ -54,10 +54,10 @@ class _NavigationShellState extends State<NavigationShell> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(context, 0, FontAwesomeIcons.terminal, 'TERMINAL'),
-            _buildNavItem(context, 1, FontAwesomeIcons.database, 'CACHE'),
-            _buildNavItem(context, 2, FontAwesomeIcons.bolt, 'SIGNALS'),
-            _buildNavItem(context, 3, FontAwesomeIcons.sliders, 'CONFIG'),
+            _buildNavItem(context, 0, FontAwesomeIcons.magnifyingGlass, 'SEARCH'),
+            _buildNavItem(context, 1, FontAwesomeIcons.clockRotateLeft, 'HISTORY'),
+            _buildNavItem(context, 2, FontAwesomeIcons.chartLine, 'TRENDS'),
+            _buildNavItem(context, 3, FontAwesomeIcons.gear, 'SETTINGS'),
           ],
         ),
       ),

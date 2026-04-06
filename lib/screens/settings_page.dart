@@ -3,8 +3,21 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 
-class SettingsPage extends StatelessWidget {
-  SettingsPage({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  // Mock state variables to make the toggles dynamic
+  bool _offlineMode = false;
+  bool _liveUpdates = true;
+  bool _saveHistory = true;
+  bool _blurEffects = true;
+  bool _uiAnimations = true;
+  bool _hapticFeedback = false;
 
   @override
   Widget build(BuildContext context) {
@@ -15,26 +28,26 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('SYSTEM CONFIG', style: Theme.of(context).textTheme.headlineMedium),
+            Text('APP SETTINGS', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
-            Text('ENGINE PARAMETERS AND INTERFACE SETTINGS', style: Theme.of(context).textTheme.labelSmall),
+            Text('PREFERENCES AND VISUAL SETTINGS', style: Theme.of(context).textTheme.labelSmall),
             const SizedBox(height: 32),
             
-            _buildSettingsSection(context, 'ENGINE', [
-              _buildToggle(context, 'MOCK DATA MODE', true),
-              _buildToggle(context, 'REAL-TIME UPDATES', false),
-              _buildToggle(context, 'LOGGING LEVEL: VERBOSE', true),
+            _buildSettingsSection(context, 'SEARCH PREFERENCES', [
+              _buildToggle('OFFLINE MODE', _offlineMode, (v) => setState(() => _offlineMode = v)),
+              _buildToggle('LIVE UPDATES', _liveUpdates, (v) => setState(() => _liveUpdates = v)),
+              _buildToggle('SAVE SEARCH HISTORY', _saveHistory, (v) => setState(() => _saveHistory = v)),
             ]),
             const SizedBox(height: 32),
-            _buildSettingsSection(context, 'INTERFACE', [
-              _buildToggle(context, 'GLASSMORPHISM BLUR', true),
-              _buildToggle(context, 'BENTO ANIMATIONS', true),
-              _buildToggle(context, 'SYSTEM FEEDBACK', false),
+            _buildSettingsSection(context, 'VISUALS', [
+              _buildToggle('BLUR EFFECTS', _blurEffects, (v) => setState(() => _blurEffects = v)),
+              _buildToggle('UI ANIMATIONS', _uiAnimations, (v) => setState(() => _uiAnimations = v)),
+              _buildToggle('HAPTIC FEEDBACK', _hapticFeedback, (v) => setState(() => _hapticFeedback = v)),
             ]),
             const SizedBox(height: 32),
             Text('ABOUT', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
-            const Text('REDDIT_SCOPE INTELLIGENCE v1.0.4', style: TextStyle(fontSize: 10, letterSpacing: 2, color: AppTheme.onSurfaceVariant)),
+            const Text('REDINTEL v1.0.4', style: TextStyle(fontSize: 10, letterSpacing: 2, color: AppTheme.onSurfaceVariant)),
           ],
         ),
       ),
@@ -56,7 +69,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildToggle(BuildContext context, String label, bool value) {
+  Widget _buildToggle(String label, bool value, ValueChanged<bool> onChanged) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: Row(
@@ -65,7 +78,7 @@ class SettingsPage extends StatelessWidget {
           Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
           Switch(
             value: value,
-            onChanged: (v) {},
+            onChanged: onChanged,
             activeColor: AppTheme.primary,
             activeTrackColor: AppTheme.primary.withOpacity(0.2),
           ),

@@ -22,9 +22,9 @@ class SignalsPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('SIGNAL MONITOR', style: Theme.of(context).textTheme.headlineMedium),
+                    Text('GLOBAL TRENDS', style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 8),
-                    Text('REAL-TIME GLOBAL REDDIT INTELLIGENCE', style: Theme.of(context).textTheme.labelSmall),
+                    Text('REAL-TIME REDDIT ACTIVITY', style: Theme.of(context).textTheme.labelSmall),
                   ],
                 ),
                 Container(

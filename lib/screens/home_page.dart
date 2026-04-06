@@ -42,14 +42,9 @@ class _HomePageState extends State<HomePage> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: MediaQuery.of(context).size.width < 600 
-              ? IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.bars, size: 18, color: AppTheme.primary),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                )
-              : null,
+            leading: null,
             title: Text(
-              'REDDIT_SCOPE',
+              'REDINTEL',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primary,
                     letterSpacing: 4,
@@ -67,25 +62,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      drawer: MediaQuery.of(context).size.width < 600 
-        ? Drawer(
-            backgroundColor: AppTheme.surface,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: const BoxDecoration(color: AppTheme.surfaceContainer),
-                  child: Center(
-                    child: Text('REDDIT_SCOPE', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
-                  ),
-                ),
-                ListTile(title: const Text('Home'), leading: const FaIcon(FontAwesomeIcons.house, size: 16), onTap: () {}),
-                ListTile(title: const Text('History'), leading: const FaIcon(FontAwesomeIcons.clockRotateLeft, size: 16), onTap: () {}),
-                ListTile(title: const Text('Settings'), leading: const FaIcon(FontAwesomeIcons.gear, size: 16), onTap: () {}),
-              ],
-            ),
-          )
-        : null,
       body: Stack(
         children: [
           // Dynamic Background
@@ -110,7 +86,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Hero Section
                 Text(
-                  'INTELLIGENCE ORCHESTRATOR',
+                  'REDDIT PROFILE ANALYZER',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 600 ? 32 : 48,
@@ -122,7 +98,7 @@ class _HomePageState extends State<HomePage> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
                 const SizedBox(height: 16),
                 const Text(
-                  'High-performance sentiment mapping and behavioral analysis for the Reddit ecosystem. Transform raw social data into actionable intelligence.',
+                  'Instantly analyze public and hidden profiles. Transform any user footprint into a clean, actionable activity summary.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 14),
                 ).animate().fadeIn(delay: 400.ms),
@@ -169,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text(
-                                  'INITIALIZE SCAN',
+                                  'SEARCH USER',
                                   style: TextStyle(
                                     color: AppTheme.onPrimaryContainer,
                                     fontWeight: FontWeight.w900,
@@ -200,8 +176,8 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('INTELLIGENCE LOGS', style: Theme.of(context).textTheme.headlineMedium),
-                        Text('RECENT DATA FETCHES', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
+                        Text('RECENT SEARCHES', style: Theme.of(context).textTheme.headlineMedium),
+                        Text('YOUR SAVED PROFILES', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
                       ],
                     ),
                     TextButton(
@@ -252,10 +228,10 @@ class _HomePageState extends State<HomePage> {
                   runSpacing: 16,
                   alignment: WrapAlignment.center,
                   children: [
-                    _buildMetricCard(context, Icons.storage, 'Nodes Scanned', '124.8k', AppTheme.secondary),
-                    _buildMetricCard(context, Icons.bolt, 'Latent Delay', '12ms', AppTheme.tertiary),
-                    _buildMetricCard(context, Icons.psychology, 'AI Certainty', '98.4%', AppTheme.primary),
-                    _buildMetricCard(context, Icons.warning, 'Anomalies', '0', AppTheme.error),
+                    _buildMetricCard(context, Icons.person_search, 'Users Analyzed', '124.8k', AppTheme.secondary),
+                    _buildMetricCard(context, Icons.timer, 'Search Speed', '1.2s', AppTheme.tertiary),
+                    _buildMetricCard(context, Icons.verified, 'Accuracy Rating', '98.4%', AppTheme.primary),
+                    _buildMetricCard(context, Icons.warning, 'Flagged Accounts', '0', AppTheme.error),
                   ],
                 ),
               ],

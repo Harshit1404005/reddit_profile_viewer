@@ -155,14 +155,21 @@ class _ScanningPageState extends State<ScanningPage> {
                         
                         // Status Section
                         Text(
-                          _currentStep,
+                          'Connecting to Reddit...',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(letterSpacing: 2, color: AppTheme.primary),
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ).animate(key: ValueKey(_currentStep)).fadeIn(),
-                        const Text(
-                          'Wait for Intelligence',
-                          style: TextStyle(fontStyle: FontStyle.italic, color: AppTheme.onSurfaceVariant),
-                        ).animate().fadeIn(delay: 200.ms),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Target: u/${widget.username}',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 64),
+                        
+                        // Animated Progress Steps
+                        _buildProgressStep(context, 'Analyzing profile data...', 0.2),
+                        _buildProgressStep(context, 'Gathering history...', 0.5),
+                        _buildProgressStep(context, 'Finalizing results...', 0.8),
                         
                         const SizedBox(height: 48),
                         
