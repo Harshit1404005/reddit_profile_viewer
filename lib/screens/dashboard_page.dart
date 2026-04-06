@@ -4,16 +4,53 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 import '../models/reddit_models.dart';
+import '../services/reddit_service.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   final VoidCallback onReset;
   final RedditProfile? profile;
 
   const DashboardPage({super.key, required this.onReset, this.profile});
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late RedditProfile? _currentProfile;
+  bool _isLoadingMore = false;
+  final RedditService _service = RedditService.create();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentProfile = widget.profile;
+  }
+
+  Future<void> _loadMore() async {
+    if (_currentProfile == null || _currentProfile!.afterToken == null || _isLoadingMore) return;
+
+    setState(() => _isLoadingMore = true);
+
+    try {
+      final updatedProfile = await _service.fetchMoreActivity(_currentProfile!);
+      setState(() {
+        _currentProfile = updatedProfile;
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingMore = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load more: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool hasData = profile != null;
+    final bool hasData = _currentProfile != null;
     
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -70,16 +107,18 @@ class DashboardPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Profile Identity Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  spacing: 24,
+                  runSpacing: 24,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Text(hasData ? 'u/${profile!.username}' : 'u/NoSession', style: Theme.of(context).textTheme.headlineLarge),
+                            Text(hasData ? 'u/${_currentProfile!.username}' : 'u/NoSession', style: Theme.of(context).textTheme.headlineLarge),
                             const SizedBox(width: 12),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -101,7 +140,7 @@ class DashboardPage extends StatelessWidget {
                                   ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'STATUS: ${hasData ? profile!.status : "OFFLINE"}', 
+                                    'STATUS: ${hasData ? _currentProfile!.status : "OFFLINE"}', 
                                     style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary),
                                   ),
                                 ],
@@ -112,16 +151,17 @@ class DashboardPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _buildSimpleMetric(context, 'TOTAL KARMA', hasData ? _formatNumber(profile!.totalKarma) : '0'),
+                            _buildSimpleMetric(context, 'TOTAL KARMA', hasData ? _formatNumber(_currentProfile!.totalKarma) : '0'),
                             Container(width: 1, height: 40, color: AppTheme.outlineVariant.withAlpha(50), margin: const EdgeInsets.symmetric(horizontal: 24)),
-                            _buildSimpleMetric(context, 'ACCOUNT AGE', hasData ? profile!.accountAge : 'Unknown'),
+                            _buildSimpleMetric(context, 'ACCOUNT AGE', hasData ? _currentProfile!.accountAge : 'Unknown'),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      width: 320,
-                      child: GlassPanel(
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      width: MediaQuery.of(context).size.width < 600 ? double.infinity : 320,
+                      child: const GlassPanel(
                         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         borderRadius: 16,
                         child: TextField(
@@ -155,11 +195,11 @@ class DashboardPage extends StatelessWidget {
                                   // Stats Row
                                   Row(
                                     children: [
-                                      Expanded(child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? profile!.recentPosts.length.toString() : '0', AppTheme.primary)),
+                                      Expanded(child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
                                       const SizedBox(width: 16),
-                                      Expanded(child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? profile!.recentComments.length.toString() : '0', AppTheme.secondary)),
+                                      Expanded(child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
                                       const SizedBox(width: 16),
-                                      Expanded(child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && profile!.recentComments.isNotEmpty ? profile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
+                                      Expanded(child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
                                     ],
                                   ),
                                   const SizedBox(height: 16),
@@ -214,11 +254,11 @@ class DashboardPage extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          _buildRiskTag('TOXIC', hasData && profile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
+                          _buildRiskTag('TOXIC', hasData && _currentProfile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
                           const SizedBox(width: 24),
-                          _buildRiskTag('NSFW', hasData && profile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
+                          _buildRiskTag('NSFW', hasData && _currentProfile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
                           const SizedBox(width: 24),
-                          _buildRiskTag('CONTROVERSIAL', hasData && profile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
+                          _buildRiskTag('CONTROVERSIAL', hasData && _currentProfile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
                         ],
                       ),
                     ],
@@ -230,8 +270,30 @@ class DashboardPage extends StatelessWidget {
                 // Content Timeline
                 Text('CONTENT TIMELINE', style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 24),
-                if (hasData && profile!.recentPosts.isNotEmpty)
-                  ...profile!.recentPosts.take(2).map((post) => _buildTimelinePost(context, post.subreddit, post.time, post.title, post.ups, post.numComments, AppTheme.primary)).toList()
+                if (hasData && (_currentProfile!.recentPosts.isNotEmpty || _currentProfile!.recentComments.isNotEmpty))
+                  ...[
+                    ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post.subreddit, post.time, post.title, post.ups, post.numComments, AppTheme.primary)),
+                    ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
+                    
+                    if (_currentProfile!.afterToken != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(
+                          child: OutlinedButton.icon(
+                            onPressed: _isLoadingMore ? null : _loadMore,
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              side: BorderSide(color: AppTheme.primary.withOpacity(0.5)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            icon: _isLoadingMore 
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const FaIcon(FontAwesomeIcons.plus, size: 14),
+                            label: Text(_isLoadingMore ? 'SYNCHRONIZING...' : 'EXTEND ANALYSIS', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ),
+                  ]
                 else
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 48),
@@ -246,7 +308,7 @@ class DashboardPage extends StatelessWidget {
             bottom: 32,
             right: 32,
             child: FloatingActionButton.extended(
-              onPressed: onReset,
+              onPressed: widget.onReset,
               backgroundColor: AppTheme.primaryContainer,
               label: Text('SCAN AGAIN', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14, color: AppTheme.onPrimaryContainer)),
               icon: const FaIcon(FontAwesomeIcons.arrowsRotate, color: AppTheme.onPrimaryContainer),
@@ -351,7 +413,7 @@ class DashboardPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            profile != null && profile!.totalKarma > 10000 
+            _currentProfile != null && _currentProfile!.totalKarma > 10000 
               ? '"A high-level analytical contributor focused on systemic trends. Communication style is objective and information-dense."'
               : '"An emerging digital footprint with selective engagement patterns. Synthesis suggests a latent information-gathering persona."',
             style: const TextStyle(fontStyle: FontStyle.italic, height: 1.5),
@@ -361,9 +423,9 @@ class DashboardPage extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildSummaryTag(profile != null && profile!.totalKarma > 1000 ? 'HIGHLY TECHNICAL' : 'EMERGING PROFILE'),
+              _buildSummaryTag(_currentProfile != null && _currentProfile!.totalKarma > 1000 ? 'HIGHLY TECHNICAL' : 'EMERGING PROFILE'),
               _buildSummaryTag('ANALYTIC TONE'),
-              _buildSummaryTag(profile != null && profile!.nsfw > 0.5 ? 'WARNING: SENSITIVE' : 'STABLE SIGNALS'),
+              _buildSummaryTag(_currentProfile != null && _currentProfile!.nsfw > 0.5 ? 'WARNING: SENSITIVE' : 'STABLE SIGNALS'),
             ],
           ),
         ],
@@ -413,7 +475,7 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _buildEngagementRow(profile != null && profile!.recentComments.isNotEmpty ? profile!.recentComments.first.subreddit : 'Sector Alpha', '68%', AppTheme.primaryContainer),
+          _buildEngagementRow(_currentProfile != null && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'Sector Alpha', '68%', AppTheme.primaryContainer),
           _buildEngagementRow('Sector Beta', '22%', AppTheme.secondary),
           _buildEngagementRow('Other Nodes', '10%', Colors.white),
         ],
@@ -490,6 +552,56 @@ class DashboardPage extends StatelessWidget {
                     FaIcon(FontAwesomeIcons.commentDots, size: 14, color: AppTheme.onSurfaceVariant),
                     const SizedBox(width: 6),
                     Text('$comm', style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildTimelineComment(BuildContext context, RedditComment comment) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(color: AppTheme.secondaryContainer.withAlpha(10), borderRadius: BorderRadius.circular(24)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: AppTheme.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            child: const Center(child: FaIcon(FontAwesomeIcons.commentDots, color: AppTheme.secondary, size: 20)),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(comment.subreddit.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
+                    Text(comment.time, style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(comment.body, style: const TextStyle(fontSize: 14, height: 1.4)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    FaIcon(FontAwesomeIcons.thumbsUp, size: 14, color: AppTheme.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text('${comment.ups}', style: Theme.of(context).textTheme.labelSmall),
+                    if (comment.isControversial) ...[
+                      const SizedBox(width: 24),
+                      FaIcon(FontAwesomeIcons.fire, size: 14, color: AppTheme.secondary),
+                      const SizedBox(width: 6),
+                      Text('CONTROVERSIAL', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
+                    ],
                   ],
                 ),
               ],

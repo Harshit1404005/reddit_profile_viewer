@@ -42,6 +42,12 @@ class _HomePageState extends State<HomePage> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: MediaQuery.of(context).size.width < 600 
+              ? IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.bars, size: 18, color: AppTheme.primary),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                )
+              : null,
             title: Text(
               'REDDIT_SCOPE',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -53,14 +59,33 @@ class _HomePageState extends State<HomePage> {
             centerTitle: true,
             actions: [
               IconButton(
-                icon: FaIcon(FontAwesomeIcons.user, size: 16, color: AppTheme.primary),
+                icon: const FaIcon(FontAwesomeIcons.circleUser, size: 18, color: AppTheme.primary),
                 onPressed: () {},
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
             ],
           ),
         ),
       ),
+      drawer: MediaQuery.of(context).size.width < 600 
+        ? Drawer(
+            backgroundColor: AppTheme.surface,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: const BoxDecoration(color: AppTheme.surfaceContainer),
+                  child: Center(
+                    child: Text('REDDIT_SCOPE', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
+                  ),
+                ),
+                ListTile(title: const Text('Home'), leading: const FaIcon(FontAwesomeIcons.house, size: 16), onTap: () {}),
+                ListTile(title: const Text('History'), leading: const FaIcon(FontAwesomeIcons.clockRotateLeft, size: 16), onTap: () {}),
+                ListTile(title: const Text('Settings'), leading: const FaIcon(FontAwesomeIcons.gear, size: 16), onTap: () {}),
+              ],
+            ),
+          )
+        : null,
       body: Stack(
         children: [
           // Dynamic Background
@@ -84,11 +109,11 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               children: [
                 // Hero Section
-                const Text(
+                Text(
                   'INTELLIGENCE ORCHESTRATOR',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 48,
+                    fontSize: MediaQuery.of(context).size.width < 600 ? 32 : 48,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -1,
                     fontStyle: FontStyle.italic,

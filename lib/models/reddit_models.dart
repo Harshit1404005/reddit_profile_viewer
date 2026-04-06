@@ -8,6 +8,7 @@ class RedditProfile {
   final double controversialIndex;
   final List<RedditPost> recentPosts;
   final List<RedditComment> recentComments;
+  final String? afterToken;
 
   RedditProfile({
     required this.username,
@@ -19,6 +20,7 @@ class RedditProfile {
     required this.controversialIndex,
     required this.recentPosts,
     required this.recentComments,
+    this.afterToken,
   });
 
   factory RedditProfile.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,8 @@ class RedditProfile {
     double? controversialIndex,
     List<RedditPost>? recentPosts,
     List<RedditComment>? recentComments,
+    String? afterToken,
+    bool clearAfterToken = false,
   }) {
     return RedditProfile(
       username: username,
@@ -63,6 +67,7 @@ class RedditProfile {
       controversialIndex: controversialIndex ?? this.controversialIndex,
       recentPosts: recentPosts ?? this.recentPosts,
       recentComments: recentComments ?? this.recentComments,
+      afterToken: clearAfterToken ? null : (afterToken ?? this.afterToken),
     );
   }
 }

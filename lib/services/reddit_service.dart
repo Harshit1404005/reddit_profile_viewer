@@ -4,11 +4,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/reddit_models.dart';
 
 /// Abstract base for Reddit intelligence gathering.
-/// 
-/// This modular architecture allows the app to switch between 
-/// Public (No-Auth) and Secure (OAuth) engines.
 abstract class RedditService {
+  RedditService();
+
   Future<RedditProfile> analyzeUser(String username);
+  Future<RedditProfile> fetchMoreActivity(RedditProfile currentProfile);
   String get mode;
 
   /// Factory to pick the appropriate service based on environment configuration.
@@ -16,7 +16,6 @@ abstract class RedditService {
     final clientId = dotenv.env['REDDIT_CLIENT_ID'];
     final clientSecret = dotenv.env['REDDIT_CLIENT_SECRET'];
 
-    // Check if real credentials exist and aren't placeholders
     bool hasAuth = clientId != null && 
                   clientId.isNotEmpty && 
                   !clientId.contains('your_client_id') &&
@@ -26,14 +25,36 @@ abstract class RedditService {
     return hasAuth ? OAuthRedditService() : PublicRedditService();
   }
 
+  /// Parses the combined overview stream into posts and comments.
+  Map<String, dynamic> parseOverview(Map<String, dynamic> json) {
+    final data = json['data'] ?? {};
+    final children = data['children'] as List? ?? [];
+    final posts = <RedditPost>[];
+    final comments = <RedditComment>[];
+    
+    for (var child in children) {
+      final kind = child['kind'];
+      if (kind == 't3') {
+        posts.add(RedditPost.fromJson(child));
+      } else if (kind == 't1') {
+        comments.add(RedditComment.fromJson(child));
+      }
+    }
+    
+    return {
+      'posts': posts,
+      'comments': comments,
+      'after': data['after'],
+    };
+  }
+
   /// Shared intelligence synthesis logic.
-  RedditProfile calculateIntelligence(RedditProfile profile, List<RedditPost> posts, List<RedditComment> comments) {
+  RedditProfile calculateIntelligence(RedditProfile profile, List<RedditPost> posts, List<RedditComment> comments, {String? afterToken}) {
     double toxic = 0.0;
     double controversial = 0.0;
     
     for (var comment in comments) {
       if (comment.isControversial) controversial += 0.2;
-      // Sentiment keyword scan
       if (comment.body.contains(RegExp(r'hate|stupid|awful|terrible|idiot|garbage', caseSensitive: false))) {
         toxic += 0.15;
       }
@@ -44,12 +65,12 @@ abstract class RedditService {
       controversialIndex: controversial.clamp(0.0, 1.0),
       recentPosts: posts,
       recentComments: comments,
+      afterToken: afterToken,
     );
   }
 }
 
 /// IMPLEMENTATION A: Public Intelligence Engine (No-Auth)
-/// Uses public .json endpoints which are accessible without a Client ID.
 class PublicRedditService extends RedditService {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'https://www.reddit.com',
@@ -68,27 +89,48 @@ class PublicRedditService extends RedditService {
       final profileResponse = await _dio.get('/user/$username/about.json');
       final profile = RedditProfile.fromJson(profileResponse.data);
 
-      // 2. Fetch Posts
-      final postsResponse = await _dio.get('/user/$username/submitted.json?limit=10');
-      final List postChildren = postsResponse.data['data']['children'] ?? [];
-      final posts = postChildren.map((p) => RedditPost.fromJson(p)).toList();
+      // 2. Fetch Overview (Posts + Comments combined, initial 20)
+      final overviewResponse = await _dio.get('/user/$username/overview.json?limit=20');
+      final parsed = parseOverview(overviewResponse.data);
 
-      // 3. Fetch Comments
-      final commentsResponse = await _dio.get('/user/$username/comments.json?limit=25');
-      final List commentChildren = commentsResponse.data['data']['children'] ?? [];
-      final comments = commentChildren.map((c) => RedditComment.fromJson(c)).toList();
-
-      // 4. Synthesize Intelligence
-      return calculateIntelligence(profile, posts, comments);
+      // 3. Synthesize Intelligence
+      return calculateIntelligence(
+        profile, 
+        parsed['posts'], 
+        parsed['comments'], 
+        afterToken: parsed['after']
+      );
     } catch (e) {
-      print("Public API Error: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<RedditProfile> fetchMoreActivity(RedditProfile currentProfile) async {
+    if (currentProfile.afterToken == null) return currentProfile;
+
+    try {
+      final overviewResponse = await _dio.get(
+        '/user/${currentProfile.username}/overview.json?limit=20&after=${currentProfile.afterToken}'
+      );
+      final parsed = parseOverview(overviewResponse.data);
+
+      final List<RedditPost> newPosts = List.from(currentProfile.recentPosts)..addAll(parsed['posts']);
+      final List<RedditComment> newComments = List.from(currentProfile.recentComments)..addAll(parsed['comments']);
+
+      return calculateIntelligence(
+        currentProfile, 
+        newPosts, 
+        newComments, 
+        afterToken: parsed['after']
+      );
+    } catch (e) {
       rethrow;
     }
   }
 }
 
 /// IMPLEMENTATION B: Secure Intelligence Engine (OAuth)
-/// Uses the official Reddit Data API. Requires approved CLIENT_ID and SECRET.
 class OAuthRedditService extends RedditService {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: 'https://oauth.reddit.com',
@@ -106,35 +148,56 @@ class OAuthRedditService extends RedditService {
   Future<RedditProfile> analyzeUser(String username) async {
     try {
       await _authenticate();
-      
       _dio.options.headers['Authorization'] = 'Bearer $_accessToken';
 
-      // OAuth endpoints have slightly different structures or require different paths 
-      // but usually the user/about still works.
       final profileResponse = await _dio.get('/user/$username/about');
       final profile = RedditProfile.fromJson(profileResponse.data);
 
-      final postsResponse = await _dio.get('/user/$username/submitted?limit=10');
-      final List postChildren = postsResponse.data['data']['children'] ?? [];
-      final posts = postChildren.map((p) => RedditPost.fromJson(p)).toList();
+      final overviewResponse = await _dio.get('/user/$username/overview?limit=20');
+      final parsed = parseOverview(overviewResponse.data);
 
-      final commentsResponse = await _dio.get('/user/$username/comments?limit=25');
-      final List commentChildren = commentsResponse.data['data']['children'] ?? [];
-      final comments = commentChildren.map((c) => RedditComment.fromJson(c)).toList();
-
-      return calculateIntelligence(profile, posts, comments);
+      return calculateIntelligence(
+        profile, 
+        parsed['posts'], 
+        parsed['comments'], 
+        afterToken: parsed['after']
+      );
     } catch (e) {
-      print("OAuth API Error: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<RedditProfile> fetchMoreActivity(RedditProfile currentProfile) async {
+    if (currentProfile.afterToken == null) return currentProfile;
+
+    try {
+      await _authenticate();
+      _dio.options.headers['Authorization'] = 'Bearer $_accessToken';
+
+      final overviewResponse = await _dio.get(
+        '/user/${currentProfile.username}/overview?limit=20&after=${currentProfile.afterToken}'
+      );
+      final parsed = parseOverview(overviewResponse.data);
+
+      final List<RedditPost> newPosts = List.from(currentProfile.recentPosts)..addAll(parsed['posts']);
+      final List<RedditComment> newComments = List.from(currentProfile.recentComments)..addAll(parsed['comments']);
+
+      return calculateIntelligence(
+        currentProfile, 
+        newPosts, 
+        newComments, 
+        afterToken: parsed['after']
+      );
+    } catch (e) {
       rethrow;
     }
   }
 
   Future<void> _authenticate() async {
     if (_accessToken != null) return;
-
     final clientId = dotenv.env['REDDIT_CLIENT_ID'];
     final clientSecret = dotenv.env['REDDIT_CLIENT_SECRET'];
-
     final authString = base64Encode(utf8.encode('$clientId:$clientSecret'));
     
     final response = await Dio().post(
@@ -145,7 +208,6 @@ class OAuthRedditService extends RedditService {
         contentType: Headers.formUrlEncodedContentType,
       ),
     );
-
     _accessToken = response.data['access_token'];
   }
 }

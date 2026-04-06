@@ -44,19 +44,19 @@ class _ScanningPageState extends State<ScanningPage> {
       });
       await Future.delayed(const Duration(seconds: 1)); // Visual delay for HUD feel
       
-      // 2. Fetch Activity
+      // 2. Fetch Comprehensive Activity
       setState(() {
         _profileComplete = true;
-        _currentStep = 'Analyzing Digital Activity';
+        _currentStep = 'Mapping Total Activity Stream';
         _progress = 0.6;
       });
       
-      // Perform the actual analysis
+      // Perform the actual overview analysis
       final profile = await _redditService.analyzeUser(widget.username);
       
       setState(() {
         _activityComplete = true;
-        _currentStep = 'Synthesizing Intelligence';
+        _currentStep = 'Synthesizing Neural Map';
         _progress = 0.9;
       });
       
@@ -70,7 +70,7 @@ class _ScanningPageState extends State<ScanningPage> {
       widget.onScanComplete(profile);
     } catch (e) {
       debugPrint('Scan Error: $e');
-      // Fallback or error UI would go here, for now just complete with empty
+      // Fallback or error UI would go here
       widget.onScanComplete(RedditProfile(
         username: widget.username,
         totalKarma: 0,
@@ -81,6 +81,7 @@ class _ScanningPageState extends State<ScanningPage> {
         controversialIndex: 0.0,
         recentPosts: [],
         recentComments: [],
+        afterToken: null,
       ));
     }
   }
@@ -117,7 +118,7 @@ class _ScanningPageState extends State<ScanningPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GlassPanel(
-                    padding: const EdgeInsets.all(48),
+                    padding: EdgeInsets.all(MediaQuery.of(context).size.width < 600 ? 24 : 48),
                     borderRadius: 40,
                     child: Column(
                       children: [
@@ -126,11 +127,11 @@ class _ScanningPageState extends State<ScanningPage> {
                           alignment: Alignment.center,
                           children: [
                             SizedBox(
-                              width: 140,
-                              height: 140,
+                              width: MediaQuery.of(context).size.width < 600 ? 100 : 140,
+                              height: MediaQuery.of(context).size.width < 600 ? 100 : 140,
                               child: CircularProgressIndicator(
                                 value: _progress,
-                                strokeWidth: 10,
+                                strokeWidth: MediaQuery.of(context).size.width < 600 ? 6 : 10,
                                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
                                 backgroundColor: AppTheme.primary.withOpacity(0.1),
                               ),
@@ -138,10 +139,12 @@ class _ScanningPageState extends State<ScanningPage> {
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                FaIcon(FontAwesomeIcons.robot, color: AppTheme.primary, size: 32),
+                                FaIcon(FontAwesomeIcons.robot, color: AppTheme.primary, size: MediaQuery.of(context).size.width < 600 ? 24 : 32),
                                 Text(
                                   '${(_progress * 100).toInt()}%',
-                                  style: Theme.of(context).textTheme.headlineLarge,
+                                  style: MediaQuery.of(context).size.width < 600 
+                                    ? Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)
+                                    : Theme.of(context).textTheme.headlineLarge,
                                 ),
                               ],
                             ),
@@ -262,22 +265,31 @@ class _ScanningPageState extends State<ScanningPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.2)),
-                child: FaIcon(
-                  completed ? FontAwesomeIcons.circleCheck : (isActive ? FontAwesomeIcons.microchip : FontAwesomeIcons.user),
-                  color: color,
-                  size: 16,
-                ).animate(onPlay: (c) => isActive ? c.repeat() : null).scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2), duration: 2.seconds).then().scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
-              ),
-              const SizedBox(width: 16),
-              Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: isActive ? AppTheme.primary : AppTheme.onSurface)),
-            ],
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.2)),
+                  child: FaIcon(
+                    completed ? FontAwesomeIcons.circleCheck : (isActive ? FontAwesomeIcons.microchip : FontAwesomeIcons.user),
+                    color: color,
+                    size: 16,
+                  ).animate(onPlay: (c) => isActive ? c.repeat() : null).scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2), duration: 2.seconds).then().scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
+                ),
+                const SizedBox(width: 16),
+                Flexible(
+                  child: Text(
+                    label, 
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.bold, color: isActive ? AppTheme.primary : AppTheme.onSurface)
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Text(status.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
         ],
       ),
