@@ -63,42 +63,68 @@ class _DashboardPageState extends State<DashboardPage> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle, 
-                    color: AppTheme.primaryContainer, 
-                    border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 2),
+            leading: MediaQuery.of(context).size.width < 600
+                ? IconButton(
+                    icon: const FaIcon(FontAwesomeIcons.bars, size: 18, color: AppTheme.primary),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle, 
+                          color: AppTheme.primaryContainer, 
+                          border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 2),
+                        ),
+                        child: const Center(child: FaIcon(FontAwesomeIcons.robot, size: 20, color: Colors.white)),
+                      ),
+                    ],
                   ),
-                  child: const Center(child: FaIcon(FontAwesomeIcons.robot, size: 20, color: Colors.white)),
-                ),
-              ],
-            ),
             title: Text(
               'RedditScope',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
             ),
-            actions: [
-              _buildNavAction('Home'),
-              _buildNavAction('History'),
-              _buildNavAction('Settings'),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryContainer, 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text('Export', style: TextStyle(color: AppTheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
-              ),
-            ],
+            actions: MediaQuery.of(context).size.width < 600
+                ? []
+                : [
+                    _buildNavAction('Home'),
+                    _buildNavAction('History'),
+                    _buildNavAction('Settings'),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryContainer, 
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Export', style: TextStyle(color: AppTheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
           ),
         ),
       ),
+      drawer: MediaQuery.of(context).size.width < 600 
+        ? Drawer(
+            backgroundColor: AppTheme.surface,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: const BoxDecoration(color: AppTheme.surfaceContainer),
+                  child: Center(
+                    child: Text('REDDIT_SCOPE', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
+                  ),
+                ),
+                ListTile(title: const Text('Home'), leading: const FaIcon(FontAwesomeIcons.house, size: 16), onTap: () {}),
+                ListTile(title: const Text('History'), leading: const FaIcon(FontAwesomeIcons.clockRotateLeft, size: 16), onTap: () {}),
+                ListTile(title: const Text('Settings'), leading: const FaIcon(FontAwesomeIcons.gear, size: 16), onTap: () {}),
+              ],
+            ),
+          )
+        : null,
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -193,15 +219,25 @@ class _DashboardPageState extends State<DashboardPage> {
                               child: Column(
                                 children: [
                                   // Stats Row
-                                  Row(
-                                    children: [
-                                      Expanded(child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
-                                      const SizedBox(width: 16),
-                                      Expanded(child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
-                                      const SizedBox(width: 16),
-                                      Expanded(child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
-                                    ],
-                                  ),
+                                  isMobile
+                                    ? Column(
+                                        children: [
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
+                                          const SizedBox(height: 16),
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
+                                          const SizedBox(height: 16),
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
+                                        ],
+                                      )
+                                    : Row(
+                                        children: [
+                                          Expanded(child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
+                                          const SizedBox(width: 16),
+                                          Expanded(child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
+                                          const SizedBox(width: 16),
+                                          Expanded(child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
+                                        ],
+                                      ),
                                   const SizedBox(height: 16),
                                   // Activity Graph Card
                                   _buildActivityGraph(context),
@@ -236,28 +272,33 @@ class _DashboardPageState extends State<DashboardPage> {
                 
                 // Risk Profile
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceContainer.withAlpha(20), 
                     borderRadius: BorderRadius.circular(24), 
                     border: Border.all(color: AppTheme.outlineVariant.withAlpha(30)),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 24,
+                    runSpacing: 24,
                     children: [
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           FaIcon(FontAwesomeIcons.shieldHalved, color: AppTheme.tertiary),
                           const SizedBox(width: 16),
                           Text('RISK ASSESSMENT PROFILE', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 14)),
                         ],
                       ),
-                      Row(
+                      Wrap(
+                        spacing: 24,
+                        runSpacing: 12,
                         children: [
                           _buildRiskTag('TOXIC', hasData && _currentProfile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
-                          const SizedBox(width: 24),
                           _buildRiskTag('NSFW', hasData && _currentProfile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
-                          const SizedBox(width: 24),
                           _buildRiskTag('CONTROVERSIAL', hasData && _currentProfile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
                         ],
                       ),
