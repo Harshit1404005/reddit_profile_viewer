@@ -22,7 +22,7 @@ class ScanningPage extends StatefulWidget {
 }
 
 class _ScanningPageState extends State<ScanningPage> {
-  final RedditService _redditService = RedditService();
+  final RedditService _redditService = RedditService.create();
   String _currentStep = 'Initializing Engine';
   double _progress = 0.1;
   bool _profileComplete = false;
@@ -204,7 +204,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         children: [
                           Container(width: 8, height: 8, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.tertiary)),
                           const SizedBox(width: 8),
-                          Text('SYSTEM ONLINE: V4.2.1-API', style: Theme.of(context).textTheme.labelSmall),
+                          Text('SYSTEM ONLINE: ${_redditService.mode}', style: Theme.of(context).textTheme.labelSmall),
                         ],
                       ),
                       const SizedBox(height: 8),
