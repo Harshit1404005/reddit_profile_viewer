@@ -90,12 +90,14 @@ class RedditPost {
   });
 
   factory RedditPost.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
+    // Official Reddit wraps the post in "data". PullPush serves it flat.
+    final data = json.containsKey('data') && json['data'] is Map ? json['data'] : json;
+    
     return RedditPost(
-      id: data['id'] ?? '',
+      id: data['id']?.toString() ?? '',
       subreddit: 'r/${data['subreddit'] ?? ''}',
       title: data['title'] ?? 'No Title',
-      ups: data['ups'] ?? 0,
+      ups: data['ups'] ?? data['score'] ?? 0,
       numComments: data['num_comments'] ?? 0,
       time: _formatTime(data['created_utc']),
     );
@@ -120,12 +122,14 @@ class RedditComment {
   });
 
   factory RedditComment.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
+    // Official Reddit wraps the comment in "data". PullPush serves it flat.
+    final data = json.containsKey('data') && json['data'] is Map ? json['data'] : json;
+
     return RedditComment(
-      id: data['id'] ?? '',
+      id: data['id']?.toString() ?? '',
       subreddit: 'r/${data['subreddit'] ?? ''}',
       body: data['body'] ?? '',
-      ups: data['ups'] ?? 0,
+      ups: data['ups'] ?? data['score'] ?? 0,
       isControversial: (data['controversiality'] ?? 0) > 0,
       time: _formatTime(data['created_utc']),
     );

@@ -79,27 +79,58 @@ class PublicRedditService extends RedditService {
     },
   ));
 
+  final Dio _pullPush = Dio(BaseOptions(baseUrl: 'https://api.pullpush.io'));
+
   @override
-  String get mode => "PUBLIC_INTELLIGENCE";
+  String get mode => "DEEP_ARCHIVE (PULLPUSH)";
 
   @override
   Future<RedditProfile> analyzeUser(String username) async {
     try {
-      // 1. Fetch Profile Info
-      final profileResponse = await _dio.get('/user/$username/about.json');
-      final profile = RedditProfile.fromJson(profileResponse.data);
+      // 1. Fetch Profile Info (Graceful fallback)
+      RedditProfile profile;
+      try {
+        final profileResponse = await _dio.get('/user/$username/about.json');
+        profile = RedditProfile.fromJson(profileResponse.data);
+      } catch (e) {
+        profile = RedditProfile(
+          username: username,
+          totalKarma: 0,
+          accountAge: 'Unknown (Private)',
+          status: 'HIDDEN (ARCHIVE BYPASS)',
+          toxicity: 0.0,
+          nsfw: 0.0,
+          controversialIndex: 0.0,
+          recentPosts: [],
+          recentComments: [],
+        );
+      }
 
-      // 2. Fetch Overview (Posts + Comments combined, initial 20)
-      final overviewResponse = await _dio.get('/user/$username/overview.json?limit=20');
-      final parsed = parseOverview(overviewResponse.data);
+      // 2. Fetch parallel archives (size 50 each)
+      final postRes = await _pullPush.get('/reddit/search/submission/?author=$username&size=50');
+      final postsData = postRes.data['data'] as List? ?? [];
+      final posts = postsData.map((p) => RedditPost.fromJson(p)).toList();
 
-      // 3. Synthesize Intelligence
-      return calculateIntelligence(
-        profile, 
-        parsed['posts'], 
-        parsed['comments'], 
-        afterToken: parsed['after']
-      );
+      final comRes = await _pullPush.get('/reddit/search/comment/?author=$username&size=50');
+      final comData = comRes.data['data'] as List? ?? [];
+      final comments = comData.map((c) => RedditComment.fromJson(c)).toList();
+
+      // Determine an artificial after token via timestamp
+      String? nextToken;
+      if (posts.isNotEmpty) {
+        // Find smallest created_utc to paginate backwards
+        final lastObj = postsData.last;
+        if (lastObj['created_utc'] != null) {
+          nextToken = lastObj['created_utc'].toString();
+        }
+      } else if (comments.isNotEmpty) {
+        final lastObj = comData.last;
+        if (lastObj['created_utc'] != null) {
+          nextToken = lastObj['created_utc'].toString();
+        }
+      }
+
+      return calculateIntelligence(profile, posts, comments, afterToken: nextToken);
     } catch (e) {
       rethrow;
     }
@@ -110,19 +141,32 @@ class PublicRedditService extends RedditService {
     if (currentProfile.afterToken == null) return currentProfile;
 
     try {
-      final overviewResponse = await _dio.get(
-        '/user/${currentProfile.username}/overview.json?limit=20&after=${currentProfile.afterToken}'
-      );
-      final parsed = parseOverview(overviewResponse.data);
+      final beforeTime = currentProfile.afterToken!;
+      final username = currentProfile.username;
 
-      final List<RedditPost> newPosts = List.from(currentProfile.recentPosts)..addAll(parsed['posts']);
-      final List<RedditComment> newComments = List.from(currentProfile.recentComments)..addAll(parsed['comments']);
+      final postRes = await _pullPush.get('/reddit/search/submission/?author=$username&size=50&before=$beforeTime');
+      final postsData = postRes.data['data'] as List? ?? [];
+      final newPosts = postsData.map((p) => RedditPost.fromJson(p)).toList();
+
+      final comRes = await _pullPush.get('/reddit/search/comment/?author=$username&size=50&before=$beforeTime');
+      final comData = comRes.data['data'] as List? ?? [];
+      final newComments = comData.map((c) => RedditComment.fromJson(c)).toList();
+
+      final combinedPosts = List<RedditPost>.from(currentProfile.recentPosts)..addAll(newPosts);
+      final combinedComments = List<RedditComment>.from(currentProfile.recentComments)..addAll(newComments);
+
+      String? nextToken;
+      if (postsData.isNotEmpty) {
+        nextToken = postsData.last['created_utc']?.toString();
+      } else if (comData.isNotEmpty) {
+        nextToken = comData.last['created_utc']?.toString();
+      }
 
       return calculateIntelligence(
         currentProfile, 
-        newPosts, 
-        newComments, 
-        afterToken: parsed['after']
+        combinedPosts, 
+        combinedComments, 
+        afterToken: nextToken
       );
     } catch (e) {
       rethrow;
