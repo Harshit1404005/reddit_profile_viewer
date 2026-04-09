@@ -66,7 +66,7 @@ class _NavigationShellState extends State<NavigationShell> {
 
   Widget _buildNavItem(BuildContext context, int index, FaIconData icon, String label) {
     final bool active = _currentIndex == index;
-    final Color color = active ? AppTheme.primary : AppTheme.onSurfaceVariant.withOpacity(0.4);
+    final Color color = active ? AppTheme.primary : AppTheme.onSurfaceVariant.withAlpha((0.4 * 255).toInt());
 
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
@@ -74,7 +74,7 @@ class _NavigationShellState extends State<NavigationShell> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? AppTheme.primaryContainer.withOpacity(0.1) : Colors.transparent,
+          color: active ? AppTheme.primaryContainer.withAlpha((0.1 * 255).toInt()) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(

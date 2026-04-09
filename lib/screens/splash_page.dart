@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
@@ -24,7 +23,7 @@ class SplashPage extends StatelessWidget {
               height: 384,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.primary.withOpacity(0.05),
+                color: AppTheme.primary.withAlpha((0.05 * 255).toInt()),
               ),
             ).animate().fadeIn(duration: 2.seconds).blur(begin: const Offset(120, 120), end: const Offset(120, 120)),
           ),
@@ -36,7 +35,7 @@ class SplashPage extends StatelessWidget {
               height: 384,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.secondary.withOpacity(0.05),
+                color: AppTheme.secondary.withAlpha((0.05 * 255).toInt()),
               ),
             ).animate().fadeIn(duration: 2.seconds).blur(begin: const Offset(120, 120), end: const Offset(120, 120)),
           ),
@@ -57,7 +56,7 @@ class SplashPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppTheme.primary.withOpacity(0.2),
+                            color: AppTheme.primary.withAlpha((0.2 * 255).toInt()),
                             width: 2,
                           ),
                         ),
@@ -80,7 +79,7 @@ class SplashPage extends StatelessWidget {
                             Container(
                               height: 40,
                               width: 2,
-                              color: AppTheme.primary.withOpacity(0.3),
+                              color: AppTheme.primary.withAlpha((0.3 * 255).toInt()),
                               margin: const EdgeInsets.symmetric(horizontal: 8),
                             ),
                             FaIcon(
@@ -90,7 +89,7 @@ class SplashPage extends StatelessWidget {
                             ).animate().scale(delay: 600.ms).fadeIn(),
                           ],
                         ),
-                      ).animate().shimmer(duration: 3.seconds, color: Colors.white.withOpacity(0.1)),
+                      ).animate().shimmer(duration: 3.seconds, color: Colors.white.withAlpha((0.1 * 255).toInt())),
                       
                       // Orbiting point
                       Positioned(
@@ -105,7 +104,7 @@ class SplashPage extends StatelessWidget {
                             border: Border.all(color: AppTheme.surface, width: 4),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.tertiary.withOpacity(0.4),
+                                color: AppTheme.tertiary.withAlpha((0.4 * 255).toInt()),
                                 blurRadius: 10,
                               )
                             ],
@@ -130,17 +129,17 @@ class SplashPage extends StatelessWidget {
                   text: TextSpan(
                     style: Theme.of(context).textTheme.headlineLarge,
                     children: const [
-                      TextSpan(text: 'Reddit'),
-                      TextSpan(text: 'Scope', style: TextStyle(color: AppTheme.primary)),
+                      TextSpan(text: 'RedIntel'),
+                      TextSpan(text: ' Insights', style: TextStyle(color: AppTheme.primary)),
                     ],
                   ),
                 ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0),
                 
                 Text(
-                  'UNDERSTAND ANY REDDIT USER',
+                  'ELITE REDDIT DATA SYNTHESIS',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    letterSpacing: 4.0,
-                    color: AppTheme.onSurfaceVariant.withOpacity(0.6),
+                    letterSpacing: 2.0,
+                    color: AppTheme.onSurfaceVariant.withAlpha((0.6 * 255).toInt()),
                   ),
                 ).animate().fadeIn(delay: 1.seconds),
               ],
@@ -177,14 +176,14 @@ class SplashPage extends StatelessWidget {
                           ),
                         ),
                       ).animate(onPlay: (controller) => controller.repeat())
-                        .shimmer(duration: 1.5.seconds, color: Colors.white.withOpacity(0.4)),
+                        .shimmer(duration: 1.5.seconds, color: Colors.white.withAlpha((0.4 * 255).toInt())),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('INITIALIZING ENGINE', style: Theme.of(context).textTheme.labelSmall),
-                        Text('v4.0.2-alpha', style: Theme.of(context).textTheme.labelSmall),
+                         Text('PREPARING INSIGHT ENGINE', style: Theme.of(context).textTheme.labelSmall),
+                         Text('v1.0.4-LATEST', style: Theme.of(context).textTheme.labelSmall),
                       ],
                     ),
                   ],

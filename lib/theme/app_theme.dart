@@ -8,18 +8,24 @@ class AppTheme {
   static const Color surfaceContainerHighest = Color(0xFF35343B);
   
   static const Color primary = Color(0xFFDCB8FF);
-  static const Color primaryContainer = Color(0xFF8A2BE2);
+  static const Color primaryContainer = Color(0xFF4A148C); // Deeper, more "Intel" purple
   static const Color onPrimaryContainer = Color(0xFFEED9FF);
   
   static const Color secondary = Color(0xFFA5C8FF);
   static const Color secondaryContainer = Color(0xFF2792FF);
   
   static const Color tertiary = Color(0xFF4CE346);
-  static const Color error = Color(0xFFFFB4AB);
+  static const Color error = Color(0xFFFF5252); // Brighter crimson for alerts
   
   static const Color onSurface = Color(0xFFE4E1EA);
   static const Color onSurfaceVariant = Color(0xFFCFC2D7);
   static const Color outlineVariant = Color(0xFF4C4354);
+
+  // Intel Source Colors
+  static const Color ghostIntel = Color(0xFF00E5FF); // Cyber Cyan
+  static const Color archiveIntel = Color(0xFFFFAB40); // Archive Orange
+  static const Color danger = Color(0xFFFF1744); // NSFW / High Risk Red
+  static const Color success = Color(0xFF00E676); // Safe / Official Green
 
   static ThemeData get darkTheme {
     return ThemeData(

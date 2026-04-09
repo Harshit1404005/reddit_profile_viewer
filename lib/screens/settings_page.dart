@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 
@@ -79,8 +78,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
-            activeTrackColor: AppTheme.primary.withOpacity(0.2),
+            activeTrackColor: AppTheme.primary.withAlpha((0.2 * 255).toInt()),
           ),
         ],
       ),

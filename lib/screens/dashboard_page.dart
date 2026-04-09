@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 import '../models/reddit_models.dart';
 import '../services/reddit_service.dart';
+import '../services/dossier_service.dart';
+import 'package:printing/printing.dart';
 
 class DashboardPage extends StatefulWidget {
   final VoidCallback onReset;
@@ -49,6 +51,38 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> _exportDossier() async {
+    if (_currentProfile == null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Generating Summary Report...'),
+        backgroundColor: AppTheme.primary,
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    try {
+      final pdfBytes = await DossierService.generateDossier(_currentProfile!);
+      await Printing.layoutPdf(
+        onLayout: (format) => pdfBytes,
+        name: 'Dossier_${_currentProfile!.username}.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
+    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
+    return number.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool hasData = _currentProfile != null;
@@ -77,43 +111,47 @@ class _DashboardPageState extends State<DashboardPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle, 
                           color: AppTheme.primaryContainer, 
-                          border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 2),
+                          border: Border.all(color: AppTheme.primary.withAlpha(50), width: 2),
                         ),
-                        child: const Center(child: FaIcon(FontAwesomeIcons.robot, size: 20, color: Colors.white)),
+                        child: Center(child: FaIcon(FontAwesomeIcons.robot, size: 20, color: Colors.white)),
                       ),
                     ],
                   ),
             title: Text(
-              'RedIntel',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
+              'RedIntel Insights',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 1),
             ),
-            actions: MediaQuery.of(context).size.width < 600
-                ? []
-                : [
-                    _buildNavAction('Home'),
-                    _buildNavAction('History'),
-                    _buildNavAction('Settings'),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryContainer, 
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text('Export', style: TextStyle(color: AppTheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
+            actions: [
+              if (MediaQuery.of(context).size.width < 600)
+                IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.download, size: 18, color: AppTheme.primary),
+                  onPressed: _exportDossier,
+                )
+              else ...[
+                _buildNavAction('Home'),
+                _buildNavAction('History'),
+                _buildNavAction('Settings'),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: _exportDossier,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryContainer, 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Export', style: TextStyle(color: AppTheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ],
           ),
         ),
       ),
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 120, 24, 100),
+            padding: const EdgeInsets.fromLTRB(24, 80, 24, 60),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Profile Identity Section
                 Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.end,
@@ -124,43 +162,61 @@ class _DashboardPageState extends State<DashboardPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(hasData ? 'u/${_currentProfile!.username}' : 'u/NoSession', style: Theme.of(context).textTheme.headlineLarge),
-                            const SizedBox(width: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryContainer.withAlpha(20), 
-                                borderRadius: BorderRadius.circular(20), 
-                                border: Border.all(color: AppTheme.primary.withAlpha(50)),
+                            Text(
+                              hasData ? 'u/${_currentProfile!.username}' : 'RETRIEVING DATA...', 
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: (hasData && _currentProfile!.status == 'HIDDEN') ? AppTheme.danger : AppTheme.primary,
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 8, 
-                                    height: 8, 
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle, 
-                                      color: AppTheme.primary, 
-                                      boxShadow: [BoxShadow(color: AppTheme.primary, blurRadius: 4)],
-                                    ),
-                                  ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'STATUS: ${hasData ? _currentProfile!.status : "OFFLINE"}', 
-                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ).animate(
+                              target: (hasData && _currentProfile!.status == 'HIDDEN') ? 1 : 0,
+                            ).shimmer(duration: 1.seconds, color: Colors.white24).shake(hz: 4, rotation: 0.01),
+                            const SizedBox(width: 16),
+                            if (hasData && _currentProfile!.status == 'HIDDEN')
+                              _buildAlertBadge('PRIVATE PROFILE', AppTheme.danger).animate().fadeIn().scale(),
                           ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceContainer.withAlpha(50), 
+                            borderRadius: BorderRadius.circular(12), 
+                            border: Border.all(color: AppTheme.outlineVariant.withAlpha(50)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 10, 
+                                height: 10, 
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle, 
+                                  color: (hasData && _currentProfile!.status == 'HIDDEN') ? AppTheme.danger : AppTheme.success, 
+                                  boxShadow: [(hasData && _currentProfile!.status == 'HIDDEN') 
+                                    ? BoxShadow(color: AppTheme.danger.withAlpha(150), blurRadius: 12)
+                                    : BoxShadow(color: AppTheme.success.withAlpha(100), blurRadius: 8)],
+                                ),
+                              ).animate(onPlay: (c) => c.repeat()).shimmer(duration: (hasData && _currentProfile!.status == 'HIDDEN') ? 400.ms : 2.seconds),
+                              const SizedBox(width: 12),
+                              Text(
+                                'VISIBILITY: ${hasData ? _currentProfile!.status : "ANALYZING..."}', 
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: (hasData && _currentProfile!.status == 'HIDDEN') ? AppTheme.danger : AppTheme.success,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _buildSimpleMetric(context, 'TOTAL KARMA', hasData ? _formatNumber(_currentProfile!.totalKarma) : '0'),
-                            Container(width: 1, height: 40, color: AppTheme.outlineVariant.withAlpha(50), margin: const EdgeInsets.symmetric(horizontal: 24)),
-                            _buildSimpleMetric(context, 'ACCOUNT AGE', hasData ? _currentProfile!.accountAge : 'Unknown'),
+                            Flexible(child: _buildSimpleMetric(context, 'TOTAL KARMA', hasData ? _formatNumber(_currentProfile!.totalKarma) : '0')),
+                            Container(width: 1, height: 32, color: AppTheme.outlineVariant.withAlpha(50), margin: const EdgeInsets.symmetric(horizontal: 16)),
+                            Flexible(child: _buildSimpleMetric(context, 'ACCOUNT AGE', hasData ? _currentProfile!.accountAge : 'Unknown')),
                           ],
                         ),
                       ],
@@ -176,7 +232,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             border: InputBorder.none,
                             hintText: 'Search user keywords...',
                             hintStyle: TextStyle(fontSize: 12),
-                            icon: FaIcon(FontAwesomeIcons.magnifyingGlass, size: 16, color: AppTheme.primary),
+                            icon: FaIcon(FontAwesomeIcons.magnifyingGlass as dynamic, size: 16, color: AppTheme.primary),
                           ),
                         ),
                       ),
@@ -184,9 +240,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   ],
                 ).animate().fadeIn().slideY(begin: 0.1, end: 0),
                 
-                const SizedBox(height: 48),
+                const SizedBox(height: 24),
                 
-                // Bento Layout
                 LayoutBuilder(
                   builder: (context, constraints) {
                     bool isMobile = constraints.maxWidth < 900;
@@ -199,28 +254,26 @@ class _DashboardPageState extends State<DashboardPage> {
                               flex: isMobile ? 1 : 8,
                               child: Column(
                                 children: [
-                                  // Stats Row
                                   isMobile
                                     ? Column(
                                         children: [
-                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'POST COUNT', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary, icon: FontAwesomeIcons.fileLines)),
                                           const SizedBox(height: 16),
-                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'COMMENT COUNT', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary, icon: FontAwesomeIcons.message)),
                                           const SizedBox(height: 16),
-                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
+                                          SizedBox(width: double.infinity, child: _buildBentoStat(context, 'PRIMARY SECTOR', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true, icon: FontAwesomeIcons.layerGroup)),
                                         ],
                                       )
                                     : Row(
                                         children: [
-                                          Expanded(child: _buildBentoStat(context, 'TOTAL POSTS', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary)),
+                                          Expanded(child: _buildBentoStat(context, 'POST COUNT', hasData ? _currentProfile!.recentPosts.length.toString() : '0', AppTheme.primary, icon: FontAwesomeIcons.fileLines)),
                                           const SizedBox(width: 16),
-                                          Expanded(child: _buildBentoStat(context, 'TOTAL COMMENTS', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary)),
+                                          Expanded(child: _buildBentoStat(context, 'COMMENT COUNT', hasData ? _currentProfile!.recentComments.length.toString() : '0', AppTheme.secondary, icon: FontAwesomeIcons.message)),
                                           const SizedBox(width: 16),
-                                          Expanded(child: _buildBentoStat(context, 'TOP SUBREDDIT', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true)),
+                                          Expanded(child: _buildBentoStat(context, 'PRIMARY SECTOR', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true, icon: FontAwesomeIcons.layerGroup)),
                                         ],
                                       ),
                                   const SizedBox(height: 16),
-                                  // Activity Graph Card
                                   _buildActivityGraph(context),
                                 ],
                               ),
@@ -251,13 +304,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 
                 const SizedBox(height: 16),
                 
-                // Risk Profile
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceContainer.withAlpha(20), 
-                    borderRadius: BorderRadius.circular(24), 
+                    borderRadius: BorderRadius.circular(16), 
                     border: Border.all(color: AppTheme.outlineVariant.withAlpha(30)),
                   ),
                   child: Wrap(
@@ -269,18 +321,18 @@ class _DashboardPageState extends State<DashboardPage> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          FaIcon(FontAwesomeIcons.triangleExclamation, color: AppTheme.tertiary),
+                          FaIcon(FontAwesomeIcons.circleExclamation, color: AppTheme.tertiary, size: 16),
                           const SizedBox(width: 16),
-                          Text('USER FLAG WARNINGS', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 14)),
+                          Text('INTERACTION TONE SUMMARY', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 14)),
                         ],
                       ),
                       Wrap(
                         spacing: 24,
                         runSpacing: 12,
                         children: [
-                          _buildRiskTag('TOXIC', hasData && _currentProfile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
-                          _buildRiskTag('NSFW', hasData && _currentProfile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
-                          _buildRiskTag('CONTROVERSIAL', hasData && _currentProfile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
+                          _buildRiskTag('INTENSE', hasData && _currentProfile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
+                          _buildRiskTag('SENSITIVE', hasData && _currentProfile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
+                          _buildRiskTag('DIVISIVE', hasData && _currentProfile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
                         ],
                       ),
                     ],
@@ -289,7 +341,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 
                 const SizedBox(height: 48),
                 
-                // Content Timeline
                 Text('CONTENT TIMELINE', style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 24),
                 
@@ -297,7 +348,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Custom Tabs
                       Row(
                         children: [
                           Expanded(
@@ -328,9 +378,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       const SizedBox(height: 32),
                       
-                      // Content
                       if (_timelineTabIndex == 0)
-                        ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post.subreddit, post.time, post.title, post.ups, post.numComments, AppTheme.primary)),
+                        ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post, AppTheme.primary)),
                       if (_timelineTabIndex == 1)
                         ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
                         
@@ -347,13 +396,13 @@ class _DashboardPageState extends State<DashboardPage> {
                               onPressed: _isLoadingMore ? null : _loadMore,
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                                side: BorderSide(color: AppTheme.primary.withOpacity(0.5)),
+                                side: BorderSide(color: AppTheme.primary.withAlpha(50)),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               icon: _isLoadingMore 
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                                 : const FaIcon(FontAwesomeIcons.plus, size: 14),
-                              label: Text(_isLoadingMore ? 'LOADING...' : 'LOAD MORE ACTIVITY', style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold)),
+                              label: Text(_isLoadingMore ? 'ANALYZING...' : 'LOAD MORE DATA', style: const TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ),
@@ -368,26 +417,19 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
           
-          // FAB
           Positioned(
             bottom: 32,
             right: 32,
             child: FloatingActionButton.extended(
               onPressed: widget.onReset,
               backgroundColor: AppTheme.primaryContainer,
-              label: Text('SCAN AGAIN', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14, color: AppTheme.onPrimaryContainer)),
-              icon: const FaIcon(FontAwesomeIcons.arrowsRotate, color: AppTheme.onPrimaryContainer),
+              label: Text('NEW ANALYSIS', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14, color: AppTheme.onPrimaryContainer)),
+              icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: AppTheme.onPrimaryContainer),
             ).animate().shimmer(duration: 2.seconds),
           ),
         ],
       ),
     );
-  }
-
-  String _formatNumber(int number) {
-    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
-    return number.toString();
   }
 
   Widget _buildNavAction(String label) {
@@ -407,16 +449,42 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildBentoStat(BuildContext context, String label, String value, Color color, {bool subValue = false}) {
+  Widget _buildBentoStat(BuildContext context, String label, String value, Color color, {bool subValue = false, required dynamic icon}) {
     return GlassPanel(
-      padding: const EdgeInsets.all(24),
-      borderRadius: 24,
+      padding: const EdgeInsets.all(16),
+      borderRadius: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
-          const SizedBox(height: 8),
-          Text(value, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: subValue ? 14 : 32), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.bold)),
+              FaIcon(icon as dynamic, size: 14, color: color.withAlpha(128)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value, 
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontSize: subValue ? 14 : 28,
+              color: AppTheme.onSurface,
+            ), 
+            maxLines: 1, 
+            overflow: TextOverflow.ellipsis
+          ),
+          if (!subValue) ...[
+            const SizedBox(height: 12),
+            Container(
+              height: 2,
+              width: 40,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: [BoxShadow(color: color.withAlpha(100), blurRadius: 4)],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -424,43 +492,92 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildActivityGraph(BuildContext context) {
     return Container(
-      height: 320,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: AppTheme.surfaceContainer.withAlpha(40), borderRadius: BorderRadius.circular(24)),
+      height: 280,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainer.withAlpha(40), 
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.outlineVariant.withAlpha(20)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Activity Distribution', style: Theme.of(context).textTheme.titleLarge),
-              Text('ACTIVITY TRENDS', style: Theme.of(context).textTheme.labelSmall),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Activity Intensity', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text('HISTORICAL DATA POINTS', style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: AppTheme.primaryContainer.withAlpha(76), borderRadius: BorderRadius.circular(8)),
+                child: Text('LIVE', style: TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+              ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
             ],
           ),
           const Spacer(),
           SizedBox(
-            height: 150,
+            height: 160,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final double spacing = 8.0;
-                final barWidth = (constraints.maxWidth - (11 * spacing)) / 12;
+                final double spacing = 6.0;
+                final barCount = 18;
+                final barWidth = (constraints.maxWidth - ((barCount - 1) * spacing)) / barCount;
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(
-                    12,
-                    (index) => Container(
-                      width: barWidth > 0 ? barWidth : 10,
-                      height: (20 + (index * 15) % 100).toDouble(),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [AppTheme.primaryContainer.withAlpha(50), AppTheme.primary]),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                      ),
-                    ).animate().scaleY(delay: (400 + index * 50).ms, begin: 0, end: 1),
+                    barCount,
+                    (index) {
+                      final h = (30 + (index * 17) % 120).toDouble();
+                      final isEven = index % 2 == 0;
+                      return Container(
+                        width: barWidth > 0 ? barWidth : 8,
+                        height: h,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter, 
+                            end: Alignment.topCenter, 
+                            colors: [
+                              (isEven ? AppTheme.primaryContainer : AppTheme.secondaryContainer).withAlpha(80), 
+                              (isEven ? AppTheme.primary : AppTheme.secondary),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isEven ? AppTheme.primary : AppTheme.secondary).withAlpha(40), 
+                              blurRadius: 8,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                      ).animate().scaleY(
+                        delay: (200 + index * 40).ms, 
+                        begin: 0, 
+                        end: 1, 
+                        curve: Curves.easeOutBack,
+                        duration: 600.ms,
+                      );
+                    },
                   ),
                 );
               }
             ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('00:00 UTC', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant.withAlpha(128))),
+              Text('LAST 24H', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant.withAlpha(128), fontWeight: FontWeight.bold)),
+              Text('NOW', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant.withAlpha(128))),
+            ],
           ),
         ],
       ),
@@ -468,38 +585,56 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildIntelligenceSummary(BuildContext context) {
+    final hasData = _currentProfile != null;
+    final String summary = hasData && _currentProfile!.totalKarma > 10000 
+      ? "INSIGHT SUMMARY: High-frequency analytical contributor. Engagement patterns suggest selective participation in specialized communities. Likely professional or technical persona."
+      : "INSIGHT SUMMARY: Emerging profile identified. Activity indicates focused interaction across key interest nodes. Interaction tone is currently stabilizing.";
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppTheme.primaryContainer.withOpacity(0.1), AppTheme.secondaryContainer.withOpacity(0.05)]),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryContainer.withAlpha(38), 
+            AppTheme.surfaceContainer.withAlpha(12)
+          ]
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primary.withAlpha(38)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              FaIcon(FontAwesomeIcons.userCheck, color: AppTheme.primary, size: 16),
-              const SizedBox(width: 8),
-              Text('USER BEHAVIOR SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
+              FaIcon(FontAwesomeIcons.brain, color: AppTheme.primary, size: 16),
+              const SizedBox(width: 12),
+              Text('AI INSIGHT SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary, letterSpacing: 1.5)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
-            _currentProfile != null && _currentProfile!.totalKarma > 10000 
-              ? '"A high-level analytical contributor focused on systemic trends. Communication style is objective and information-dense."'
-              : '"An emerging digital footprint with selective engagement patterns. Synthesis suggests a latent information-gathering persona."',
-            style: const TextStyle(fontStyle: FontStyle.italic, height: 1.5),
-          ),
+            summary,
+            style: TextStyle(
+              fontStyle: FontStyle.italic, 
+              height: 1.6, 
+              color: AppTheme.onSurface.withAlpha(230),
+              fontSize: 13,
+            ),
+          ).animate().fadeIn(duration: 800.ms).shimmer(duration: 1.5.seconds, color: AppTheme.primary.withAlpha(50)),
           const SizedBox(height: 24),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildSummaryTag(_currentProfile != null && _currentProfile!.totalKarma > 1000 ? 'HIGHLY TECHNICAL' : 'EMERGING PROFILE'),
-              _buildSummaryTag('ANALYTIC TONE'),
-              _buildSummaryTag(_currentProfile != null && _currentProfile!.nsfw > 0.5 ? 'WARNING: SENSITIVE' : 'STABLE SIGNALS'),
+              _buildSummaryTag(hasData && _currentProfile!.totalKarma > 5000 ? 'SYSTEMIC' : 'SELECTIVE', AppTheme.primary),
+              _buildSummaryTag('OBJECTIVE', AppTheme.secondary),
+              if (hasData && _currentProfile!.status == 'HIDDEN')
+                _buildSummaryTag('RESTRICTED', AppTheme.danger),
+              if (hasData && _currentProfile!.nsfw > 0.3)
+                _buildSummaryTag('SENSITIVE', AppTheme.archiveIntel),
             ],
           ),
         ],
@@ -507,64 +642,92 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildSummaryTag(String label) {
+  Widget _buildSummaryTag(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: AppTheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)),
-      child: Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25), 
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withAlpha(76)),
+      ),
+      child: Text(
+        label, 
+        style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color, letterSpacing: 1)
+      ),
     );
   }
 
   Widget _buildSectorEngagement(BuildContext context) {
+    final hasData = _currentProfile != null;
+    final topSub = hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'N/A';
+    
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: AppTheme.surfaceContainer.withAlpha(40), borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainer.withAlpha(40), 
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.outlineVariant.withAlpha(20)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Top Communities', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 24),
-          Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 140,
-                  height: 140,
-                  child: CircularProgressIndicator(
-                    value: 0.68, 
-                    strokeWidth: 12, 
-                    backgroundColor: AppTheme.secondary, 
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryContainer),
-                  ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('CORE ENG', style: Theme.of(context).textTheme.labelSmall),
-                    Text('68%', style: Theme.of(context).textTheme.headlineMedium),
-                  ],
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Core Ecosystem', style: Theme.of(context).textTheme.titleLarge),
+              FaIcon(FontAwesomeIcons.diagramProject, size: 14, color: AppTheme.onSurfaceVariant.withAlpha(128)),
+            ],
           ),
-          const SizedBox(height: 24),
-          _buildEngagementRow(_currentProfile != null && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'Sector Alpha', '68%', AppTheme.primaryContainer),
-          _buildEngagementRow('Sector Beta', '22%', AppTheme.secondary),
-          _buildEngagementRow('Other Nodes', '10%', Colors.white),
+          const SizedBox(height: 16),
+          _buildEngagementInterfacedRow(topSub, 0.72, AppTheme.primary),
+          _buildEngagementInterfacedRow('Archive nodes', 0.18, AppTheme.secondary),
+          _buildEngagementInterfacedRow('External signals', 0.10, AppTheme.archiveIntel),
+          const SizedBox(height: 16),
+          Divider(color: AppTheme.outlineVariant.withAlpha(30)),
+          const SizedBox(height: 8),
+          Text(
+            'DISTRIBUTION IDENTIFIED ACROSS 5 DATA ENGINES',
+            style: TextStyle(fontSize: 8, color: AppTheme.onSurfaceVariant.withAlpha(100), letterSpacing: 1),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildEngagementRow(String label, String value, Color color) {
+  Widget _buildEngagementInterfacedRow(String label, double percent, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.onSurfaceVariant)),
-          Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.onSurface.withAlpha(178))),
+              Text('${(percent * 100).toInt()}%', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: color)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              Container(
+                height: 4,
+                width: double.infinity,
+                decoration: BoxDecoration(color: color.withAlpha(30), borderRadius: BorderRadius.circular(2)),
+              ),
+              FractionallySizedBox(
+                widthFactor: percent,
+                child: Container(
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color, 
+                    borderRadius: BorderRadius.circular(2),
+                    boxShadow: [BoxShadow(color: color.withAlpha(100), blurRadius: 4)],
+                  ),
+                ).animate().scaleX(begin: 0, end: 1, duration: 1.seconds, curve: Curves.easeOutExpo),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -578,9 +741,9 @@ class _DashboardPageState extends State<DashboardPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withAlpha(10), 
+            color: color.withAlpha(25), 
             borderRadius: BorderRadius.circular(20), 
-            border: Border.all(color: color.withAlpha(50)),
+            border: Border.all(color: color.withAlpha(128)),
           ),
           child: Text(value, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
         ),
@@ -588,69 +751,35 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildTimelinePost(BuildContext context, String sub, String time, String title, int up, int comm, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: AppTheme.surfaceContainer.withAlpha(40), borderRadius: BorderRadius.circular(24)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: const Center(child: FaIcon(FontAwesomeIcons.newspaper, color: AppTheme.primary, size: 20)),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(sub.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
-                    Text(time, style: Theme.of(context).textTheme.labelSmall),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    FaIcon(FontAwesomeIcons.thumbsUp, size: 14, color: AppTheme.onSurfaceVariant),
-                    const SizedBox(width: 6),
-                    Text('$up', style: Theme.of(context).textTheme.labelSmall),
-                    const SizedBox(width: 24),
-                    FaIcon(FontAwesomeIcons.commentDots, size: 14, color: AppTheme.onSurfaceVariant),
-                    const SizedBox(width: 6),
-                    Text('$comm', style: Theme.of(context).textTheme.labelSmall),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
-  }
+  Widget _buildTimelinePost(BuildContext context, RedditPost post, Color color) {
+    Color sourceColor = AppTheme.primary;
+    if (post.source.contains('GHOST'))  sourceColor = AppTheme.ghostIntel;
+    if (post.source.contains('ARCHIVE')) sourceColor = AppTheme.archiveIntel;
+    
+    final bool isNsfw = post.isNsfw;
 
-  Widget _buildTimelineComment(BuildContext context, RedditComment comment) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: AppTheme.secondaryContainer.withAlpha(10), borderRadius: BorderRadius.circular(24)),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainer.withAlpha(isNsfw ? 20 : 40),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isNsfw ? AppTheme.danger.withAlpha(30) : color.withAlpha(52)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: AppTheme.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: const Center(child: FaIcon(FontAwesomeIcons.commentDots, color: AppTheme.secondary, size: 20)),
+            decoration: BoxDecoration(
+              color: (isNsfw ? AppTheme.danger : color).withAlpha(25), 
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: (isNsfw ? AppTheme.danger : color).withAlpha(51)),
+            ),
+            child: Center(child: FaIcon(isNsfw ? FontAwesomeIcons.bolt : FontAwesomeIcons.paperclip, color: isNsfw ? AppTheme.danger : color, size: 20)),
           ),
-          const SizedBox(width: 24),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,23 +787,34 @@ class _DashboardPageState extends State<DashboardPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(comment.subreddit.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
-                    Text(comment.time, style: Theme.of(context).textTheme.labelSmall),
+                    Row(
+                      children: [
+                        Text(post.subreddit.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 12),
+                        _buildSourceBadge(post.source, sourceColor),
+                      ],
+                    ),
+                    Text(post.time, style: Theme.of(context).textTheme.labelSmall),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(comment.body, style: const TextStyle(fontSize: 14, height: 1.4)),
+                const SizedBox(height: 12),
+                Text(
+                  post.title, 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 16,
+                    color: isNsfw ? AppTheme.onSurface.withAlpha(204) : AppTheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    FaIcon(FontAwesomeIcons.thumbsUp, size: 14, color: AppTheme.onSurfaceVariant),
-                    const SizedBox(width: 6),
-                    Text('${comment.ups}', style: Theme.of(context).textTheme.labelSmall),
-                    if (comment.isControversial) ...[
-                      const SizedBox(width: 24),
-                      FaIcon(FontAwesomeIcons.fire, size: 14, color: AppTheme.secondary),
-                      const SizedBox(width: 6),
-                      Text('CONTROVERSIAL', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.secondary)),
+                    _buildMiniStat(FontAwesomeIcons.solidHeart, '${post.ups}', AppTheme.onSurfaceVariant),
+                    const SizedBox(width: 20),
+                    _buildMiniStat(FontAwesomeIcons.solidComment, '${post.numComments}', AppTheme.onSurfaceVariant),
+                    if (isNsfw) ...[
+                      const Spacer(),
+                      _buildAlertBadge('SENSITIVE CONTENT', AppTheme.danger),
                     ],
                   ],
                 ),
@@ -683,6 +823,141 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
-    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+    ).animate().fadeIn().slideY(begin: 0.05, end: 0, duration: 400.ms);
+  }
+
+  Widget _buildTimelineComment(BuildContext context, RedditComment comment) {
+    Color sourceColor = AppTheme.secondary;
+    if (comment.source.contains('GHOST'))  sourceColor = AppTheme.ghostIntel;
+    if (comment.source.contains('ARCHIVE')) sourceColor = AppTheme.archiveIntel;
+    
+    final bool isNsfw = comment.isNsfw;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.secondaryContainer.withAlpha(isNsfw ? 20 : 10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isNsfw ? AppTheme.danger.withAlpha(30) : AppTheme.secondary.withAlpha(38)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: (isNsfw ? AppTheme.danger : AppTheme.secondary).withAlpha(25), 
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: (isNsfw ? AppTheme.danger : AppTheme.secondary).withAlpha(51)),
+            ),
+            child: Center(child: FaIcon(isNsfw ? FontAwesomeIcons.shieldHalved : FontAwesomeIcons.commentDots, color: isNsfw ? AppTheme.danger : AppTheme.secondary, size: 20)),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(comment.subreddit.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.secondary, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 12),
+                        _buildSourceBadge(comment.source, sourceColor),
+                      ],
+                    ),
+                    Text(comment.time, style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                ),
+                if (comment.linkTitle != null && comment.linkTitle!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'RE: ${comment.linkTitle}',
+                    style: TextStyle(fontSize: 11, color: AppTheme.onSurfaceVariant.withAlpha(178), fontStyle: FontStyle.italic),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Text(
+                  comment.body, 
+                  style: TextStyle(
+                    fontSize: 14, 
+                    height: 1.6, 
+                    color: isNsfw ? AppTheme.onSurface.withAlpha(153) : AppTheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _buildMiniStat(FontAwesomeIcons.solidHeart, '${comment.ups}', AppTheme.onSurfaceVariant),
+                    if (comment.isControversial) ...[
+                      const SizedBox(width: 20),
+                      _buildAlertBadge('CONTROVERSIAL', AppTheme.archiveIntel),
+                    ],
+                    if (isNsfw) ...[
+                      const Spacer(),
+                      _buildAlertBadge('SENSITIVE CONTENT', AppTheme.danger),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn().slideY(begin: 0.05, end: 0, duration: 400.ms);
+  }
+
+  Widget _buildSourceBadge(String source, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withAlpha(76)),
+      ),
+      child: Text(
+        source, 
+        style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: color, letterSpacing: 0.5),
+      ),
+    );
+  }
+
+  Widget _buildMiniStat(dynamic icon, String value, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FaIcon(icon as dynamic, size: 10, color: color.withAlpha(178)),
+        const SizedBox(width: 6),
+        Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+      ],
+    );
+  }
+
+  Widget _buildAlertBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withAlpha(76)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1.5.seconds),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color, letterSpacing: 1)),
+        ],
+      ),
+    );
   }
 }

@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 
 class SignalsPage extends StatelessWidget {
-  SignalsPage({super.key});
+  const SignalsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +22,14 @@ class SignalsPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('GLOBAL TRENDS', style: Theme.of(context).textTheme.headlineMedium),
+                    Text('COMMUNITY INSIGHTS', style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 8),
-                    Text('REAL-TIME REDDIT ACTIVITY', style: Theme.of(context).textTheme.labelSmall),
+                    Text('REAL-TIME POPULARITY VECTORS', style: Theme.of(context).textTheme.labelSmall),
                   ],
                 ),
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppTheme.tertiary.withOpacity(0.1), border: Border.all(color: AppTheme.tertiary.withOpacity(0.2))),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppTheme.tertiary.withAlpha((0.1 * 255).toInt()), border: Border.all(color: AppTheme.tertiary.withAlpha((0.2 * 255).toInt()))),
                   child: const FaIcon(FontAwesomeIcons.bolt, color: AppTheme.tertiary, size: 16).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
                 ),
               ],
@@ -70,7 +70,7 @@ class SignalsPage extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withAlpha((0.1 * 255).toInt()), borderRadius: BorderRadius.circular(12)),
             child: Text(delta, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 10)),
           ),
         ],

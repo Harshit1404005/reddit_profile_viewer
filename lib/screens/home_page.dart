@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
+import '../services/cache_service.dart';
+import '../models/reddit_models.dart';
 
 class HomePage extends StatefulWidget {
   final Function(String) onSearch;
@@ -15,6 +17,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _controller = TextEditingController();
+  List<RedditProfile> _history = [];
+  Map<String, dynamic> _metrics = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCache();
+  }
+
+  void _loadCache() {
+    setState(() {
+      _history = CacheService.getHistory();
+      _metrics = CacheService.getSystemMetrics();
+    });
+  }
+
+  Future<void> _clearHistory() async {
+    await CacheService.clearHistory();
+    _loadCache();
+  }
 
   @override
   void dispose() {
@@ -34,8 +56,8 @@ class _HomePageState extends State<HomePage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.surface.withOpacity(0.8),
-                AppTheme.surface.withOpacity(0.0),
+                AppTheme.surface.withAlpha((0.8 * 255).toInt()),
+                AppTheme.surface.withAlpha(0),
               ],
             ),
           ),
@@ -44,10 +66,10 @@ class _HomePageState extends State<HomePage> {
             elevation: 0,
             leading: null,
             title: Text(
-              'REDINTEL',
+              'REDINTEL INSIGHTS',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primary,
-                    letterSpacing: 4,
+                    letterSpacing: 2,
                     fontWeight: FontWeight.w900,
                   ),
             ),
@@ -72,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                   center: Alignment.center,
                   radius: 1.5,
                   colors: [
-                    AppTheme.primary.withOpacity(0.05),
+                    AppTheme.primary.withAlpha((0.05 * 255).toInt()),
                     AppTheme.surface,
                   ],
                 ),
@@ -81,7 +103,7 @@ class _HomePageState extends State<HomePage> {
           ),
 
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 120, 24, 100),
+            padding: const EdgeInsets.fromLTRB(24, 80, 24, 120),
             child: Column(
               children: [
                 // Hero Section
@@ -103,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 14),
                 ).animate().fadeIn(delay: 400.ms),
 
-                const SizedBox(height: 48),
+                const SizedBox(height: 24),
 
                 // Search Input
                 Container(
@@ -119,12 +141,12 @@ class _HomePageState extends State<HomePage> {
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: 'Enter Reddit username...',
-                            hintStyle: TextStyle(color: AppTheme.onSurfaceVariant.withOpacity(0.3)),
+                            hintStyle: TextStyle(color: AppTheme.onSurfaceVariant.withAlpha((0.3 * 255).toInt())),
                             icon: FaIcon(FontAwesomeIcons.at, color: AppTheme.primary, size: 18),
                           ),
                         ),
                       ).animate().scale(delay: 600.ms),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () => widget.onSearch(_controller.text.trim()),
                         style: ElevatedButton.styleFrom(
@@ -140,16 +162,16 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text(
-                                  'SEARCH USER',
+                                  'ANALYZE PROFILE',
                                   style: TextStyle(
                                     color: AppTheme.onPrimaryContainer,
                                     fontWeight: FontWeight.w900,
-                                    letterSpacing: 2,
+                                    letterSpacing: 1.5,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -167,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 
-                const SizedBox(height: 80),
+                const SizedBox(height: 48),
                 
                 // Intelligence Logs Section
                 Row(
@@ -176,49 +198,51 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('RECENT SEARCHES', style: Theme.of(context).textTheme.headlineMedium),
-                        Text('YOUR SAVED PROFILES', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
+                        Text('RECENT INSIGHTS', style: Theme.of(context).textTheme.headlineMedium),
+                        Text('SAVED ANALYSIS LOGS', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
                       ],
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: _clearHistory,
                       child: const Text('Clear History', style: TextStyle(color: AppTheme.secondary)),
                     ),
                   ],
                 ).animate().fadeIn(delay: 1.seconds),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 
                 // Bento Grid
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 1,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  childAspectRatio: 1.5,
-                  children: [
-                    _buildLogCard(
-                      context,
-                      'u/DeepCoder',
-                      'r/MachineLearning, r/PyTorch',
-                      'Positive Bias',
-                      'Expert Tier',
-                      AppTheme.tertiary,
-                      AppTheme.secondary,
+                _history.isEmpty 
+                  ? _buildActionCard(context, 'Monitor New User', 'Real-time signal tracking')
+                  : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 1,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.5,
                     ),
-                    _buildLogCard(
-                      context,
-                      'u/GlobalAdmin',
-                      'r/SystemAdmin, r/Cybersecurity',
-                      'Volatile',
-                      'Mod History',
-                      AppTheme.error,
-                      AppTheme.onSurfaceVariant,
-                    ),
-                    _buildActionCard(context, 'Monitor New User', 'Real-time signal tracking'),
-                  ],
-                ).animate().fadeIn(delay: 1.2.seconds).slideY(begin: 0.1, end: 0),
+                    itemCount: (_history.length >= 2 ? 3 : _history.length + 1),
+                    itemBuilder: (context, index) {
+                      if (index < _history.length && index < 2) {
+                        final p = _history[index];
+                        final sectors = p.recentComments.isNotEmpty 
+                          ? p.recentComments.take(2).map((c) => c.subreddit.replaceAll('r/', '')).join(', ')
+                          : 'General Activity';
+                        return _buildLogCard(
+                          context,
+                          'u/${p.username}',
+                          sectors,
+                          p.status,
+                          p.accountAge,
+                          p.status == 'HIDDEN' ? AppTheme.error : AppTheme.primary,
+                          AppTheme.secondary,
+                        );
+                      }
+                      return _buildActionCard(context, 'Monitor New User', 'Real-time signal tracking');
+                    },
+                  ).animate().fadeIn(delay: 1.2.seconds).slideY(begin: 0.1, end: 0),
                 
                 const SizedBox(height: 48),
                 
@@ -228,9 +252,12 @@ class _HomePageState extends State<HomePage> {
                   runSpacing: 16,
                   alignment: WrapAlignment.center,
                   children: [
-                    _buildMetricCard(context, Icons.person_search, 'Users Analyzed', '124.8k', AppTheme.secondary),
-                    _buildMetricCard(context, Icons.timer, 'Search Speed', '1.2s', AppTheme.tertiary),
-                    _buildMetricCard(context, Icons.verified, 'Accuracy Rating', '98.4%', AppTheme.primary),
+                    _buildMetricCard(context, Icons.person_search, 'Users Analyzed', 
+                      _metrics['analyzed_count']?.toString() ?? '124.8k', AppTheme.secondary),
+                    _buildMetricCard(context, Icons.timer, 'Search Speed', 
+                      _metrics['search_speed']?.toString() ?? '1.2s', AppTheme.tertiary),
+                    _buildMetricCard(context, Icons.verified, 'Accuracy Rating', 
+                      _metrics['accuracy_rating']?.toString() ?? '98.4%', AppTheme.primary),
                     _buildMetricCard(context, Icons.warning, 'Flagged Accounts', '0', AppTheme.error),
                   ],
                 ),
@@ -284,8 +311,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildActionCard(BuildContext context, String title, String subtitle) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainer.withOpacity(0.5),
-        border: Border.all(color: AppTheme.outlineVariant.withOpacity(0.2), width: 2),
+        color: AppTheme.surfaceContainer.withAlpha((0.5 * 255).toInt()),
+        border: Border.all(color: AppTheme.outlineVariant.withAlpha((0.2 * 255).toInt()), width: 2),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -295,7 +322,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppTheme.primary.withOpacity(0.05),
+              color: AppTheme.primary.withAlpha((0.05 * 255).toInt()),
             ),
             child: FaIcon(FontAwesomeIcons.plus, color: AppTheme.primary),
           ),
@@ -321,13 +348,13 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainer.withOpacity(0.4),
+        color: AppTheme.surfaceContainer.withAlpha((0.4 * 255).toInt()),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color.withOpacity(0.7), size: 16),
+          Icon(icon, color: color.withAlpha((0.7 * 255).toInt()), size: 16),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,32 +363,6 @@ class _HomePageState extends State<HomePage> {
               Text(label, style: const TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 9, letterSpacing: 1.0)),
               Text(value, style: Theme.of(context).textTheme.titleLarge),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, FaIconData icon, String label, bool active) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: active ? AppTheme.primaryContainer.withOpacity(0.2) : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FaIcon(icon, color: active ? AppTheme.primary : AppTheme.onSurfaceVariant.withOpacity(0.4)),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: active ? AppTheme.primary : AppTheme.onSurfaceVariant.withOpacity(0.4),
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.0,
-            ),
           ),
         ],
       ),

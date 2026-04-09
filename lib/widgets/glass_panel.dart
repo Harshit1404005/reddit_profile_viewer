@@ -28,11 +28,19 @@ class GlassPanel extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: color ?? Colors.white.withOpacity(0.03),
+            color: color ?? Colors.white.withAlpha((0.04 * 255).toInt()),
             borderRadius: BorderRadius.circular(borderRadius),
             border: border ?? Border.all(
-              color: Colors.white.withOpacity(0.05),
-              width: 1.0,
+              color: Colors.white.withAlpha((0.1 * 255).toInt()),
+              width: 0.5,
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withAlpha((0.08 * 255).toInt()),
+                Colors.white.withAlpha((0.02 * 255).toInt()),
+              ],
             ),
           ),
           child: child,

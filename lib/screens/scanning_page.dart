@@ -23,7 +23,6 @@ class ScanningPage extends StatefulWidget {
 
 class _ScanningPageState extends State<ScanningPage> {
   final RedditService _redditService = RedditService.create();
-  String _currentStep = 'Initializing Engine';
   double _progress = 0.1;
   bool _profileComplete = false;
   bool _activityComplete = false;
@@ -39,7 +38,6 @@ class _ScanningPageState extends State<ScanningPage> {
     try {
       // 1. Fetch Profile
       setState(() {
-        _currentStep = 'Fetching Profile: u/${widget.username}';
         _progress = 0.3;
       });
       await Future.delayed(const Duration(seconds: 1)); // Visual delay for HUD feel
@@ -47,7 +45,6 @@ class _ScanningPageState extends State<ScanningPage> {
       // 2. Fetch Comprehensive Activity
       setState(() {
         _profileComplete = true;
-        _currentStep = 'Mapping Total Activity Stream';
         _progress = 0.6;
       });
       
@@ -56,7 +53,6 @@ class _ScanningPageState extends State<ScanningPage> {
       
       setState(() {
         _activityComplete = true;
-        _currentStep = 'Synthesizing Neural Map';
         _progress = 0.9;
       });
       
@@ -133,7 +129,7 @@ class _ScanningPageState extends State<ScanningPage> {
                                 value: _progress,
                                 strokeWidth: MediaQuery.of(context).size.width < 600 ? 6 : 10,
                                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primary),
-                                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                                backgroundColor: AppTheme.primary.withAlpha((0.1 * 255).toInt()),
                               ),
                             ),
                             Column(
@@ -155,7 +151,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         
                         // Status Section
                         Text(
-                          'Connecting to Reddit...',
+                          'Connecting to Insight Engine...',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(letterSpacing: 2, color: AppTheme.primary),
                           textAlign: TextAlign.center,
                         ),
@@ -172,7 +168,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         // Step List
                         _buildStatusStep(
                           context, 
-                          'Analyzing Profile Data', 
+                          'Processing Profile Analytics', 
                           _profileComplete ? 'Complete' : (_progress < 0.6 ? 'Active' : 'Complete'), 
                           AppTheme.tertiary, 
                           _profileComplete, 
@@ -181,7 +177,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         const SizedBox(height: 12),
                         _buildStatusStep(
                           context, 
-                          'Gathering History', 
+                          'Retrieving Historical Data', 
                           _activityComplete ? 'Complete' : (_progress >= 0.6 && _progress < 0.9 ? 'Active' : 'Queued'), 
                           AppTheme.primary, 
                           _activityComplete, 
@@ -190,7 +186,7 @@ class _ScanningPageState extends State<ScanningPage> {
                         const SizedBox(height: 12),
                         _buildStatusStep(
                           context, 
-                          'Finalizing Results', 
+                          'Synthesizing Insights', 
                           _analysisComplete ? 'Complete' : (_progress >= 0.9 ? 'Active' : 'Queued'), 
                           AppTheme.secondary, 
                           _analysisComplete, 
@@ -215,7 +211,7 @@ class _ScanningPageState extends State<ScanningPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Scanning u/${widget.username}. All Reddit data encrypted during synthesis.',
+                        'Analyzing u/${widget.username}. All data processed through secure synthesis nodes.',
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 10, color: AppTheme.onSurfaceVariant),
                       ),
@@ -261,7 +257,7 @@ class _ScanningPageState extends State<ScanningPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: completed ? AppTheme.surfaceContainerHigh.withOpacity(0.4) : (isActive ? AppTheme.primaryContainer.withOpacity(0.1) : AppTheme.surfaceContainer.withOpacity(0.3)),
+        color: completed ? AppTheme.surfaceContainerHigh.withAlpha((0.4 * 255).toInt()) : (isActive ? AppTheme.primaryContainer.withAlpha((0.1 * 255).toInt()) : AppTheme.surfaceContainer.withAlpha((0.3 * 255).toInt())),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: isActive ? AppTheme.primary.withAlpha(50) : AppTheme.outlineVariant.withAlpha(30)),
       ),
@@ -274,7 +270,7 @@ class _ScanningPageState extends State<ScanningPage> {
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.2)),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: color.withAlpha((0.2 * 255).toInt())),
                   child: FaIcon(
                     completed ? FontAwesomeIcons.circleCheck : (isActive ? FontAwesomeIcons.microchip : FontAwesomeIcons.user),
                     color: color,

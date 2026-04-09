@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
+import '../services/cache_service.dart';
 
 class HistoryPage extends StatelessWidget {
-  HistoryPage({super.key});
+  const HistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final history = CacheService.getHistory();
+
     return Scaffold(
       backgroundColor: AppTheme.surface,
       body: SingleChildScrollView(
@@ -15,18 +18,37 @@ class HistoryPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('INTEL CACHE', style: Theme.of(context).textTheme.headlineMedium),
+            Text('SAVED INSIGHTS', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
-            Text('ARCHIVED SCAN RESULTS AND SESSION LOGS', style: Theme.of(context).textTheme.labelSmall),
+            Text('ARCHIVED ANALYSIS LOGS AND PROFILE DATA', style: Theme.of(context).textTheme.labelSmall),
             const SizedBox(height: 32),
             
-            _buildHistoryItem(context, 'u/InsightfulRedditor', '4Y 2M', 'TECH, SCIENCE', AppTheme.primary),
-            const SizedBox(height: 16),
-            _buildHistoryItem(context, 'u/GlobalAdmin', '8Y 6M', 'ADMIN, MODERATION', AppTheme.secondary),
-            const SizedBox(height: 16),
-            _buildHistoryItem(context, 'u/DeepCoder', '2Y 1M', 'PYTHON, AI, EDGE', AppTheme.tertiary),
-            const SizedBox(height: 16),
-            _buildHistoryItem(context, 'u/CryptoWizard', '3Y 11M', 'FINANCE, BLOCKCHAIN', AppTheme.onSurfaceVariant),
+            if (history.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 80),
+                  child: Column(
+                    children: [
+                      FaIcon(FontAwesomeIcons.folderOpen, color: AppTheme.onSurfaceVariant.withAlpha(50), size: 48),
+                      const SizedBox(height: 16),
+                      const Text('NO ARCHIVED LOGS FOUND', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 10, letterSpacing: 2)),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ...history.map((p) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildHistoryItem(
+                  context, 
+                  'u/${p.username}', 
+                  p.accountAge, 
+                  p.recentComments.isNotEmpty 
+                      ? p.recentComments.take(2).map((c) => c.subreddit.replaceAll('r/', '')).join(', ')
+                      : 'GENERAL', 
+                  p.status == 'HIDDEN' ? AppTheme.error : AppTheme.primary
+                ),
+              )),
           ],
         ),
       ),
@@ -42,7 +64,7 @@ class HistoryPage extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withAlpha((0.1 * 255).toInt()), borderRadius: BorderRadius.circular(12)),
             child: Center(child: FaIcon(FontAwesomeIcons.user, color: color, size: 20)),
           ),
           const SizedBox(width: 24),
