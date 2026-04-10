@@ -23,11 +23,64 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _isLoadingMore = false;
   final RedditService _service = RedditService.create();
   int _timelineTabIndex = 0;
+  String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
     _currentProfile = widget.profile;
+  }
+
+  List<RedditPost> get _filteredPosts {
+    if (_currentProfile == null) return [];
+    if (_searchQuery.isEmpty) return _currentProfile!.recentPosts;
+    return _currentProfile!.recentPosts.where((p) => 
+      p.title.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+      p.subreddit.toLowerCase().contains(_searchQuery.toLowerCase())
+    ).toList();
+  }
+
+  List<RedditComment> get _filteredComments {
+    if (_currentProfile == null) return [];
+    if (_searchQuery.isEmpty) return _currentProfile!.recentComments;
+    return _currentProfile!.recentComments.where((c) => 
+      c.body.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+      c.subreddit.toLowerCase().contains(_searchQuery.toLowerCase())
+    ).toList();
+  }
+
+  Map<String, double> _calculateSectors() {
+    if (_currentProfile == null) return {};
+    final subs = <String, int>{};
+    for (var p in _currentProfile!.recentPosts) subs[p.subreddit] = (subs[p.subreddit] ?? 0) + 1;
+    for (var c in _currentProfile!.recentComments) subs[c.subreddit] = (subs[c.subreddit] ?? 0) + 1;
+    
+    if (subs.isEmpty) return {};
+    final total = subs.values.fold(0, (a, b) => a + b);
+    final sorted = subs.entries.toList()..sort((a,b) => b.value.compareTo(a.value));
+    
+    return { for (var e in sorted.take(3)) e.key : e.value / total };
+  }
+
+  List<double> _getActivityData() {
+    if (_currentProfile == null) return List.filled(18, 0.0);
+    final bars = List.filled(18, 0.0);
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    
+    for (var p in _currentProfile!.recentPosts) {
+      final diff = (now - p.rawTimestamp).abs();
+      final index = (diff ~/ (86400 * 2)).clamp(0, 17);
+      bars[17 - index]++;
+    }
+    for (var c in _currentProfile!.recentComments) {
+      final diff = (now - c.rawTimestamp).abs();
+      final index = (diff ~/ (86400 * 2)).clamp(0, 17);
+      bars[17 - index]++;
+    }
+    
+    final max = bars.reduce((a, b) => a > b ? a : b);
+    if (max == 0) return bars;
+    return bars.map((v) => (30 + (v / max * 120)).toDouble()).toList();
   }
 
   Future<void> _loadMore() async {
@@ -118,7 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
             title: Text(
-              'RedIntel Insights',
+              'Profile Analytics',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 1),
             ),
             actions: [
@@ -221,22 +274,23 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ],
                     ),
-                    Container(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      width: MediaQuery.of(context).size.width < 600 ? double.infinity : 320,
-                      child: const GlassPanel(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        borderRadius: 16,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Search user keywords...',
-                            hintStyle: TextStyle(fontSize: 12),
-                            icon: FaIcon(FontAwesomeIcons.magnifyingGlass as dynamic, size: 16, color: AppTheme.primary),
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 400),
+                        width: MediaQuery.of(context).size.width < 600 ? double.infinity : 320,
+                        child: GlassPanel(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          borderRadius: 16,
+                          child: TextField(
+                            onChanged: (v) => setState(() => _searchQuery = v),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Search user keywords...',
+                              hintStyle: TextStyle(fontSize: 12),
+                              icon: FaIcon(FontAwesomeIcons.magnifyingGlass, size: 16, color: AppTheme.primary),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ).animate().fadeIn().slideY(begin: 0.1, end: 0),
                 
@@ -273,11 +327,11 @@ class _DashboardPageState extends State<DashboardPage> {
                                           Expanded(child: _buildBentoStat(context, 'PRIMARY SECTOR', hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'None', AppTheme.tertiary, subValue: true, icon: FontAwesomeIcons.layerGroup)),
                                         ],
                                       ),
-                                  const SizedBox(height: 16),
-                                  _buildActivityGraph(context),
-                                ],
+                                    const SizedBox(height: 16),
+                                    _buildActivityGraph(context, _getActivityData()),
+                                  ],
+                                ),
                               ),
-                            ),
                             if (!isMobile) const SizedBox(width: 16),
                             if (!isMobile) Expanded(
                               flex: 4,
@@ -285,7 +339,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 children: [
                                   _buildIntelligenceSummary(context),
                                   const SizedBox(height: 16),
-                                  _buildSectorEngagement(context),
+                                  _buildSectorEngagement(context, _calculateSectors()),
                                 ],
                               ),
                             ),
@@ -295,7 +349,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           const SizedBox(height: 16),
                           _buildIntelligenceSummary(context),
                           const SizedBox(height: 16),
-                          _buildSectorEngagement(context),
+                          _buildSectorEngagement(context, _calculateSectors()),
                         ],
                       ],
                     );
@@ -358,7 +412,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 decoration: BoxDecoration(
                                   border: Border(bottom: BorderSide(color: _timelineTabIndex == 0 ? AppTheme.primary : AppTheme.outlineVariant, width: 2)),
                                 ),
-                                child: Center(child: Text('POSTS (${_currentProfile!.recentPosts.length})', style: TextStyle(color: _timelineTabIndex == 0 ? AppTheme.primary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
+                                child: Center(child: Text('POSTS (${_filteredPosts.length})', style: TextStyle(color: _timelineTabIndex == 0 ? AppTheme.primary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
                               ),
                             ),
                           ),
@@ -370,7 +424,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 decoration: BoxDecoration(
                                   border: Border(bottom: BorderSide(color: _timelineTabIndex == 1 ? AppTheme.secondary : AppTheme.outlineVariant, width: 2)),
                                 ),
-                                child: Center(child: Text('COMMENTS (${_currentProfile!.recentComments.length})', style: TextStyle(color: _timelineTabIndex == 1 ? AppTheme.secondary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
+                                child: Center(child: Text('COMMENTS (${_filteredComments.length})', style: TextStyle(color: _timelineTabIndex == 1 ? AppTheme.secondary : AppTheme.onSurfaceVariant, fontWeight: FontWeight.bold))),
                               ),
                             ),
                           ),
@@ -379,14 +433,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       const SizedBox(height: 32),
                       
                       if (_timelineTabIndex == 0)
-                        ..._currentProfile!.recentPosts.map((post) => _buildTimelinePost(context, post, AppTheme.primary)),
+                        ..._filteredPosts.map((post) => _buildTimelinePost(context, post, AppTheme.primary)),
                       if (_timelineTabIndex == 1)
-                        ..._currentProfile!.recentComments.map((comment) => _buildTimelineComment(context, comment)),
-                        
-                      if (_timelineTabIndex == 0 && _currentProfile!.recentPosts.isEmpty)
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO RECENT POSTS DETECTED', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
-                      if (_timelineTabIndex == 1 && _currentProfile!.recentComments.isEmpty)
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO RECENT COMMENTS DETECTED', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
+                        ..._filteredComments.map((comment) => _buildTimelineComment(context, comment)),
+                          
+                      if (_timelineTabIndex == 0 && _filteredPosts.isEmpty)
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO SEARCH MATCHES FOUND', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
+                      if (_timelineTabIndex == 1 && _filteredComments.isEmpty)
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 48), child: Center(child: Text('NO SEARCH MATCHES FOUND', style: TextStyle(color: AppTheme.onSurfaceVariant, fontSize: 12, letterSpacing: 2)))),
                         
                       if (_currentProfile!.afterToken != null)
                         Padding(
@@ -490,7 +544,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildActivityGraph(BuildContext context) {
+  Widget _buildActivityGraph(BuildContext context, List<double> data) {
     return Container(
       height: 280,
       padding: const EdgeInsets.all(16),
@@ -534,7 +588,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: List.generate(
                     barCount,
                     (index) {
-                      final h = (30 + (index * 17) % 120).toDouble();
+                      final h = data[index];
                       final isEven = index % 2 == 0;
                       return Container(
                         width: barWidth > 0 ? barWidth : 8,
@@ -587,8 +641,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildIntelligenceSummary(BuildContext context) {
     final hasData = _currentProfile != null;
     final String summary = hasData && _currentProfile!.totalKarma > 10000 
-      ? "INSIGHT SUMMARY: High-frequency analytical contributor. Engagement patterns suggest selective participation in specialized communities. Likely professional or technical persona."
-      : "INSIGHT SUMMARY: Emerging profile identified. Activity indicates focused interaction across key interest nodes. Interaction tone is currently stabilizing.";
+      ? "RESEARCH SUMMARY: High-frequency platform contributor. Engagement patterns suggest selective participation in niche communities. Likely professional or technical demographic."
+      : "RESEARCH SUMMARY: Emerging profile identified. Activity indicates focused interaction across key topic nodes. Interaction tone is currently stabilizing.";
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -611,7 +665,7 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               FaIcon(FontAwesomeIcons.brain, color: AppTheme.primary, size: 16),
               const SizedBox(width: 12),
-              Text('AI INSIGHT SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary, letterSpacing: 1.5)),
+              Text('AI RESEARCH SUMMARY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary, letterSpacing: 1.5)),
             ],
           ),
           const SizedBox(height: 20),
@@ -657,7 +711,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildSectorEngagement(BuildContext context) {
+  Widget _buildSectorEngagement(BuildContext context, Map<String, double> sectors) {
     final hasData = _currentProfile != null;
     final topSub = hasData && _currentProfile!.recentComments.isNotEmpty ? _currentProfile!.recentComments.first.subreddit : 'N/A';
     
@@ -679,9 +733,10 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildEngagementInterfacedRow(topSub, 0.72, AppTheme.primary),
-          _buildEngagementInterfacedRow('Archive nodes', 0.18, AppTheme.secondary),
-          _buildEngagementInterfacedRow('External signals', 0.10, AppTheme.archiveIntel),
+          if (sectors.isEmpty)
+            _buildEngagementInterfacedRow('No Data', 0.0, AppTheme.onSurfaceVariant)
+          else
+            ...sectors.entries.map((e) => _buildEngagementInterfacedRow(e.key, e.value, AppTheme.primary)),
           const SizedBox(height: 16),
           Divider(color: AppTheme.outlineVariant.withAlpha(30)),
           const SizedBox(height: 8),

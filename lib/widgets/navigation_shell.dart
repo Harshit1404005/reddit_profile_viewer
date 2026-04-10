@@ -7,10 +7,19 @@ import '../screens/history_page.dart';
 import '../screens/signals_page.dart';
 import '../screens/settings_page.dart';
 
-class NavigationShell extends StatefulWidget {
-  final Function(String) onSearch; // Triggers the Scanning state in Orchestrator
+import '../models/reddit_models.dart';
 
-  const NavigationShell({super.key, required this.onSearch});
+class NavigationShell extends StatefulWidget {
+  final Function(String) onSearch; 
+  final Function(RedditProfile) onViewProfile;
+  final Function(String) onReScan;
+
+  const NavigationShell({
+    super.key, 
+    required this.onSearch,
+    required this.onViewProfile,
+    required this.onReScan,
+  });
 
   @override
   State<NavigationShell> createState() => _NavigationShellState();
@@ -26,7 +35,7 @@ class _NavigationShellState extends State<NavigationShell> {
     super.initState();
     _pages = [
       HomePage(onSearch: widget.onSearch),
-      HistoryPage(),
+      HistoryPage(onViewProfile: widget.onViewProfile, onReScan: widget.onReScan),
       SignalsPage(),
       SettingsPage(),
     ];

@@ -182,7 +182,7 @@ class SplashPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text('PREPARING INSIGHT ENGINE', style: Theme.of(context).textTheme.labelSmall),
+                         Text('PREPARING ANALYTICS ENGINE', style: Theme.of(context).textTheme.labelSmall),
                          Text('v1.0.4-LATEST', style: Theme.of(context).textTheme.labelSmall),
                       ],
                     ),

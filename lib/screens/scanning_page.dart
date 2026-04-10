@@ -151,13 +151,13 @@ class _ScanningPageState extends State<ScanningPage> {
                         
                         // Status Section
                         Text(
-                          'Connecting to Insight Engine...',
+                          'Connecting to Analytics Engine...',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(letterSpacing: 2, color: AppTheme.primary),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Target: u/${widget.username}',
+                          'Profile: u/${widget.username}',
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppTheme.onSurfaceVariant),
                         ),
                         const SizedBox(height: 64),

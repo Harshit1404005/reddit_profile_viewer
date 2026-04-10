@@ -16,26 +16,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _controller = TextEditingController();
-  List<RedditProfile> _history = [];
+  final RedditService _redditService = RedditService.create();
   Map<String, dynamic> _metrics = {};
+  Map<String, dynamic> _pulse = {};
+  bool _loadingPulse = true;
 
   @override
   void initState() {
     super.initState();
     _loadCache();
+    _loadPulse();
   }
 
   void _loadCache() {
     setState(() {
-      _history = CacheService.getHistory();
       _metrics = CacheService.getSystemMetrics();
     });
   }
 
-  Future<void> _clearHistory() async {
-    await CacheService.clearHistory();
-    _loadCache();
+  Future<void> _loadPulse() async {
+    final pulse = await _redditService.getGlobalPulse();
+    if (mounted) {
+      setState(() {
+        _pulse = pulse;
+        _loadingPulse = false;
+      });
+    }
   }
 
   @override
@@ -138,6 +144,7 @@ class _HomePageState extends State<HomePage> {
                         child: TextField(
                           controller: _controller,
                           style: const TextStyle(fontSize: 18),
+                          onSubmitted: (v) => widget.onSearch(v.trim()),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: 'Enter Reddit username...',
@@ -191,58 +198,38 @@ class _HomePageState extends State<HomePage> {
                 
                 const SizedBox(height: 48),
                 
-                // Intelligence Logs Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Community Pulse Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text('RECENT INSIGHTS', style: Theme.of(context).textTheme.headlineMedium),
-                        Text('SAVED ANALYSIS LOGS', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
+                        const FaIcon(FontAwesomeIcons.bolt, color: AppTheme.tertiary, size: 14),
+                        const SizedBox(width: 8),
+                        Text('COMMUNITY PULSE', style: Theme.of(context).textTheme.headlineMedium),
                       ],
                     ),
-                    TextButton(
-                      onPressed: _clearHistory,
-                      child: const Text('Clear History', style: TextStyle(color: AppTheme.secondary)),
-                    ),
+                    Text('REAL-TIME SIGNAL SYNTHESIS VIA PROXY', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.tertiary)),
+                    const SizedBox(height: 16),
+                    _loadingPulse 
+                      ? const LinearProgressIndicator(backgroundColor: AppTheme.surfaceContainer, color: AppTheme.tertiary)
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ...(_pulse['keywords'] as List? ?? []).take(5).map((k) => Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppTheme.tertiary.withAlpha(50)),
+                              ),
+                              child: Text(k.toString(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.tertiary)),
+                            )),
+                          ],
+                        ),
                   ],
                 ).animate().fadeIn(delay: 1.seconds),
-                
-                const SizedBox(height: 16),
-                
-                // Bento Grid
-                _history.isEmpty 
-                  ? _buildActionCard(context, 'Monitor New User', 'Real-time signal tracking')
-                  : GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.of(context).size.width > 800 ? 3 : 1,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 1.5,
-                    ),
-                    itemCount: (_history.length >= 2 ? 3 : _history.length + 1),
-                    itemBuilder: (context, index) {
-                      if (index < _history.length && index < 2) {
-                        final p = _history[index];
-                        final sectors = p.recentComments.isNotEmpty 
-                          ? p.recentComments.take(2).map((c) => c.subreddit.replaceAll('r/', '')).join(', ')
-                          : 'General Activity';
-                        return _buildLogCard(
-                          context,
-                          'u/${p.username}',
-                          sectors,
-                          p.status,
-                          p.accountAge,
-                          p.status == 'HIDDEN' ? AppTheme.error : AppTheme.primary,
-                          AppTheme.secondary,
-                        );
-                      }
-                      return _buildActionCard(context, 'Monitor New User', 'Real-time signal tracking');
-                    },
-                  ).animate().fadeIn(delay: 1.2.seconds).slideY(begin: 0.1, end: 0),
                 
                 const SizedBox(height: 48),
                 
@@ -253,12 +240,13 @@ class _HomePageState extends State<HomePage> {
                   alignment: WrapAlignment.center,
                   children: [
                     _buildMetricCard(context, Icons.person_search, 'Users Analyzed', 
-                      _metrics['analyzed_count']?.toString() ?? '124.8k', AppTheme.secondary),
+                      _metrics['analyzed_count']?.toString() ?? '124', AppTheme.secondary),
                     _buildMetricCard(context, Icons.timer, 'Search Speed', 
                       _metrics['search_speed']?.toString() ?? '1.2s', AppTheme.tertiary),
                     _buildMetricCard(context, Icons.verified, 'Accuracy Rating', 
                       _metrics['accuracy_rating']?.toString() ?? '98.4%', AppTheme.primary),
-                    _buildMetricCard(context, Icons.warning, 'Flagged Accounts', '0', AppTheme.error),
+                    _buildMetricCard(context, Icons.privacy_tip, 'Priority Insights', 
+                      _metrics['hidden_count']?.toString() ?? '0', AppTheme.error),
                   ],
                 ),
               ],

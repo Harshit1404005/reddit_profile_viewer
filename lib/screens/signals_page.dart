@@ -4,11 +4,39 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 
-class SignalsPage extends StatelessWidget {
+class SignalsPage extends StatefulWidget {
   const SignalsPage({super.key});
 
   @override
+  State<SignalsPage> createState() => _SignalsPageState();
+}
+
+class _SignalsPageState extends State<SignalsPage> {
+  final RedditService _redditService = RedditService.create();
+  Map<String, dynamic> _pulse = {};
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPulse();
+  }
+
+  Future<void> _loadPulse() async {
+    final data = await _redditService.getGlobalPulse();
+    if (mounted) {
+      setState(() {
+        _pulse = data;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final keywords = (_pulse['keywords'] as List? ?? []);
+    final subreddits = (_pulse['subreddits'] as List? ?? []);
+
     return Scaffold(
       backgroundColor: AppTheme.surface,
       body: SingleChildScrollView(
@@ -36,17 +64,22 @@ class SignalsPage extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             
-            _buildSignalMetric(context, 'ACTIVE SUBREDDITS', '142,852', AppTheme.primary, '+12.4%'),
-            const SizedBox(height: 16),
-            _buildSignalMetric(context, 'GLOBAL SENTIMENT', 'POSITIVE', AppTheme.secondary, 'NEUTRAL'),
-            
-            const SizedBox(height: 32),
-            Text('TRENDING KEYWORDS', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 24),
-            _buildTrendingRow(context, 'LLM ARCHITECTURE', 'HIGH', AppTheme.primary),
-            _buildTrendingRow(context, 'NEUROPLASTICITY', 'LOW', AppTheme.secondary),
-            _buildTrendingRow(context, 'EDGE DEPLOYMENT', 'MEDIUM', AppTheme.tertiary),
-            _buildTrendingRow(context, 'ZERO-SHOT LEARNING', 'HIGH', AppTheme.primary),
+            if (_loading) 
+              const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+            else ...[
+              _buildSignalMetric(context, 'ACTIVE SUBREDDITS', subreddits.isNotEmpty ? subreddits.first.toString().toUpperCase() : 'HOT', AppTheme.primary, '+12.4%'),
+              const SizedBox(height: 16),
+              _buildSignalMetric(context, 'GLOBAL SENTIMENT', _pulse['sentiment'] ?? 'STABLE', AppTheme.secondary, 'NEUTRAL'),
+              
+              const SizedBox(height: 32),
+              Text('TRENDING KEYWORDS', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 24),
+              ...keywords.map((k) => _buildTrendingRow(context, k.toString(), 'HIGH', AppTheme.primary)),
+              const SizedBox(height: 24),
+              Text('ACTIVE COMMUNITIES', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 24),
+              ...subreddits.map((s) => _buildTrendingRow(context, s.toString().toUpperCase(), 'MEDIUM', AppTheme.secondary)),
+            ],
           ],
         ),
       ),

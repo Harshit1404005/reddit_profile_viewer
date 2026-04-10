@@ -1,51 +1,52 @@
-# RedIntel Insights 🕵️‍♂️
-### Elite Reddit OSINT & Behavioral Analysis
+# RedIntel Insights 📊
+### Deep Reddit Analytics & Audience Intelligence
 
-**RedIntel** is a professional-grade Open Source Intelligence (OSINT) platform designed to transform fragmented Reddit data into structured, actionable intelligence dossiers. Built for analysts who require deep-profile visibility, behavioral scoring, and high-fidelity reporting.
+**RedIntel** is a professional-grade Audience Intelligence platform designed to transform fragmented Reddit data into structured, actionable behavioral dossiers. Built for analysts, researchers, and community managers who require deep-profile visibility, demographic scoring, and high-fidelity reporting, all within a stunning, fluid UI experience.
 
 ---
 
-## ⚡ Core Intelligence Capabilities
+## ⚡ Core Analytical Capabilities
 
-### 1. Interception Engine (Multi-Source Extraction)
-RedIntel bypasses standard user visibility restrictions by utilizing a parallel multi-engine fetch pipeline:
-- **Ghost Proxy**: Custom Cloudflare Worker infrastructure that aggregates search and archive nodes.
-- **Archive Deep-Scan**: Direct integration with the PullPush archive to retrieve hidden or deleted footprints.
-- **Public & Legacy Intercents**: Simultaneous queries to standard JSON APIs and old.reddit.com for maximum coverage.
+### 1. Unified Sourcing Engine (Multi-Node Extraction)
+RedIntel aggregates complex user history by utilizing a parallel data-fetch pipeline:
+- **Proxy Intelligence**: Custom Cloudflare Worker infrastructure that dynamically aggregates and load-balances data nodes.
+- **Archive Deep-Scan**: Direct integration with legacy historical archives to provide a complete picture of a user's historical engagement.
+- **Dynamic Synthesizers**: Graceful fallback strategies that synthesize data from official API gateways when necessary.
 
-### 2. Analytical Synthesis
-The engine performs real-time behavioral fingerprinting on extracted data:
-- **Toxicity Radar**: Automated detection of erratic or high-conflict engagement patterns.
-- **Sector Mapping**: Identifies core areas of influence and interest (Subreddit Ecosystems).
-- **Temporal Analysis**: Tracks account aging and frequency of signal transmissions.
+### 2. Live Behavioral Synthesis
+The engine performs real-time analytics without writing to disk (unless persistent history is requested):
+- **Activity Intensity Mapping**: A dynamic histogram instantly calculates activity commitment and time-based engagement patterns over the past 30 days.
+- **Sector Engagement**: Real-time percentage breakdowns of the communities and subreddits a user interacts with the most, clustered by interest.
+- **Tone & Interaction Radar**: Automated analysis of sentiment, controversial engagement, and interaction tone to categorize community participation style.
 
-### 3. Elite Insight Engine
-Generate agency-standard PDF analysis reports at the touch of a button. Reports include:
-- **Executive Summaries**: AI-synthesized overviews of user personas.
-- **Behavioral Signals**: Visual indicators of engagement and tone.
-- **Activity Timelines**: Detailed logs of activity with precise source origin tracking.
+### 3. Community Pulse Engine
+A real-time macro-view of the platform's ecosystem:
+- Automatically tracks **Trending Topics** and **Active Subreddits** globally.
+- Interfaces directly with the Cloudflare Proxy to pool live network intelligence and trending research vectors.
+- Live-updating global sentiment indices for market research.
 
-### 4. Forensic HUD (User Interface)
-- **High-Density Bento Layout**: Optimized for rapid scannability and maximum information density.
-- **Persistent Intelligence**: Binary local caching (Hive) for offline access to historical interceptions.
-- **Zero-Latency Navigation**: Pure Dart implementation with crystalline glassmorphism aesthetics.
+### 4. Intelligence Dashboard (Premium UI)
+Built with fluid animations and a modern Crystalline Glassmorphism aesthetic:
+- **Reactive Data Timelines**: Instantly filter hundreds of posts and comments using the built-in audience research search engine.
+- **Seamless Navigation**: Context-jump instantly between your global Research Logs to an in-depth profile Dashboard.
+- **Persistent Preferences**: Localized Hive storage ensures UI and privacy toggles (like turning off local logging) survive app restarts.
+- **Export Engine**: Generate agency-standard PDF analysis reports at the touch of a button.
 
 ---
 
 ## 🛠 Technical Stack
-- **Framework**: Flutter (Cross-platform)
-- **Persistence**: Hive (NoSQL Binary Storage)
-- **Networking**: Dio (Advanced HTTP Interceptors)
-- **Reporting**: PDF & Printing (Forensic-grade reporting)
-- **Animations**: Flutter Animate (Fluid Intelligence HUD)
+- **Framework**: Flutter (Cross-platform pure Dart implementation)
+- **State & Persistence**: Hive (Lightning-fast NoSQL Binary Storage)
+- **Networking**: Dio (Advanced HTTP Interceptors) & Custom Cloudflare Worker Proxies
+- **Reporting**: PDF & Printing (Agency-grade research reporting)
+- **Design System**: Flutter Animate (Fluid Dashboard HUD)
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Environment Setup**: Populate `.env` with your proxy and infrastructure details.
-2. **Infrastructure**: Deploy the RedIntel Cloudflare Worker (see `proxy_guide.md` for specifications).
-3. **Execution**:
+1. **Infrastructure Prep**: Deploy the RedIntel Cloudflare Worker proxy (`hg140400.workers.dev` pattern) for deep data processing and Community Pulse signals.
+2. **Execution**:
    ```bash
    flutter pub get
    flutter run -d windows
@@ -54,7 +55,7 @@ Generate agency-standard PDF analysis reports at the touch of a button. Reports 
 ---
 
 ## 🔒 Legal & Compliance
-RedIntel is designed as a **Data Viewer** for public information. It adheres to platform policies by providing a synthesized view of open-source data. Use responsibly in accordance with digital intelligence ethics.
+RedIntel is designed as a **Data Synthesis and Research Viewer** for public and archived information. It adheres to platform policies by providing an analytical view of publicly available open-source data. Use responsibly in accordance with digital research ethics.
 
 ---
-**REDINTEL v1.0.4** | *Synthesizing the Digital Void*
+**REDINTEL v1.0.4** | *Data-Driven Audience Research*

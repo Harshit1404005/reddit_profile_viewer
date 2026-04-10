@@ -10,13 +10,34 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // Mock state variables to make the toggles dynamic
   bool _offlineMode = false;
   bool _liveUpdates = true;
   bool _saveHistory = true;
   bool _blurEffects = true;
   bool _uiAnimations = true;
   bool _hapticFeedback = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  void _loadSettings() {
+    setState(() {
+      _offlineMode = CacheService.getSetting('offline_mode', false);
+      _liveUpdates = CacheService.getSetting('live_updates', true);
+      _saveHistory = CacheService.getSetting('save_history', true);
+      _blurEffects = CacheService.getSetting('blur_effects', true);
+      _uiAnimations = CacheService.getSetting('ui_animations', true);
+      _hapticFeedback = CacheService.getSetting('haptic_feedback', false);
+    });
+  }
+
+  Future<void> _updateSetting(String key, bool value, Function(bool) updateState) async {
+    await CacheService.setSetting(key, value);
+    setState(() => updateState(value));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +54,15 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 32),
             
             _buildSettingsSection(context, 'SEARCH PREFERENCES', [
-              _buildToggle('OFFLINE MODE', _offlineMode, (v) => setState(() => _offlineMode = v)),
-              _buildToggle('LIVE UPDATES', _liveUpdates, (v) => setState(() => _liveUpdates = v)),
-              _buildToggle('SAVE SEARCH HISTORY', _saveHistory, (v) => setState(() => _saveHistory = v)),
+              _buildToggle('OFFLINE MODE', _offlineMode, (v) => _updateSetting('offline_mode', v, (val) => _offlineMode = val)),
+              _buildToggle('LIVE UPDATES', _liveUpdates, (v) => _updateSetting('live_updates', v, (val) => _liveUpdates = val)),
+              _buildToggle('SAVE SEARCH HISTORY', _saveHistory, (v) => _updateSetting('save_history', v, (val) => _saveHistory = val)),
             ]),
             const SizedBox(height: 32),
             _buildSettingsSection(context, 'VISUALS', [
-              _buildToggle('BLUR EFFECTS', _blurEffects, (v) => setState(() => _blurEffects = v)),
-              _buildToggle('UI ANIMATIONS', _uiAnimations, (v) => setState(() => _uiAnimations = v)),
-              _buildToggle('HAPTIC FEEDBACK', _hapticFeedback, (v) => setState(() => _hapticFeedback = v)),
+              _buildToggle('BLUR EFFECTS', _blurEffects, (v) => _updateSetting('blur_effects', v, (val) => _blurEffects = val)),
+              _buildToggle('UI ANIMATIONS', _uiAnimations, (v) => _updateSetting('ui_animations', v, (val) => _uiAnimations = val)),
+              _buildToggle('HAPTIC FEEDBACK', _hapticFeedback, (v) => _updateSetting('haptic_feedback', v, (val) => _hapticFeedback = val)),
             ]),
             const SizedBox(height: 32),
             Text('ABOUT', style: Theme.of(context).textTheme.titleLarge),

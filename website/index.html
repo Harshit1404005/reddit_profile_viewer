@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedIntel Insights | Deep Reddit Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #131319;
+            --surface: #1F1F26;
+            --surface-highest: #35343B;
+            --primary: #DCB8FF;
+            --primary-container: #4A148C;
+            --secondary: #A5C8FF;
+            --tertiary: #4CE346;
+            --text-primary: #E4E1EA;
+            --text-secondary: #CFC2D7;
+            --glass-border: rgba(220, 184, 255, 0.15);
+            --glass-bg: rgba(31, 31, 38, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Ambient Orbs Background */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .glow-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--primary); }
+        .glow-2 { bottom: -20%; right: -10%; width: 800px; height: 800px; background: var(--secondary); }
+        .glow-3 { top: 40%; left: 50%; width: 400px; height: 400px; background: var(--tertiary); filter: blur(200px); opacity: 0.05;}
+
+        /* Typography */
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo i { color: var(--primary); }
+        
+        .request-btn {
+            background: rgba(74, 20, 140, 0.3);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .request-btn:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(220, 184, 255, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 6rem;
+            align-items: center;
+        }
+        .hero-content h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-weight: 900;
+        }
+        .hero-content p {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-bottom: 3rem;
+            max-width: 90%;
+        }
+        .waitlist-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 450px;
+        }
+        .waitlist-input {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--surface-highest);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .waitlist-input:focus { border-color: var(--primary); }
+        .waitlist-submit {
+            background: linear-gradient(135deg, var(--primary), #b388ff);
+            color: var(--bg-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .waitlist-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(220, 184, 255, 0.3);
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+        .hero-image-wrapper:hover {
+            transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+        }
+        .hero-image {
+            width: 100%;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(220, 184, 255, 0.2);
+            filter: drop-shadow(0 0 20px rgba(165, 200, 255, 0.2));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(76, 227, 70, 0.1);
+            border: 1px solid rgba(76, 227, 70, 0.3);
+            color: var(--tertiary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--tertiary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--tertiary);
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 227, 70, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(76, 227, 70, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 227, 70, 0); }
+        }
+
+        /* Features Section */
+        .features {
+            margin-top: 10rem;
+            margin-bottom: 6rem;
+        }
+        .features h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .feature-card {
+            padding: 2.5rem;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(220, 184, 255, 0.4);
+        }
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(220, 184, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--surface-highest);
+            font-size: 0.9rem;
+            margin-top: 5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; text-align: center; gap: 3rem; margin-top: 3rem;}
+            .hero-content h1 { font-size: 3rem; }
+            .hero-content p { margin: 0 auto 2rem auto; }
+            .waitlist-form { margin: 0 auto; flex-direction: column;}
+            .features-grid { grid-template-columns: 1fr; }
+            .hero-image-wrapper { transform: none; }
+            .hero-image-wrapper:hover { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Lighting -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav>
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i>
+                REDINTEL
+            </div>
+            <button class="request-btn">Request Access</button>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-content">
+                <div class="status-badge">
+                    <div class="pulse"></div>
+                    BETA V1.0.4 - LIVE
+                </div>
+                <h1>Deep Reddit <br><span class="gradient-text">Audience Analytics</span></h1>
+                <p>Professional-grade audience intelligence. Transform fragmented social data into structured, actionable demographic dossiers.</p>
+                
+                <form class="waitlist-form" onsubmit="event.preventDefault(); alert('Thanks for joining the RedIntel Beta waitlist!');">
+                    <input type="email" class="waitlist-input" placeholder="Enter your work email..." required>
+                    <button type="submit" class="waitlist-submit">Join Beta</button>
+                </form>
+                <p style="font-size: 0.8rem; margin-top: 1rem; color: #888;">Used by top community managers & researchers.</p>
+            </div>
+            
+            <div class="hero-image-wrapper">
+                <img src="hero.png" alt="RedIntel Dashboard Interface" class="hero-image">
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features">
+            <h2>Core Analytical Capabilities</h2>
+            <div class="features-grid">
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-network-wired"></i></div>
+                    <h3>Unified Sourcing</h3>
+                    <p>Aggregates complex history by utilizing a parallel data-fetch pipeline containing active endpoints and legacy historical archives.</p>
+                </div>
+                
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                    <h3>Live Behavioral Synthesis</h3>
+                    <p>Real-time sector engagement breakdowns. Instantly calculate activity commitment and categorize community participation interaction tones.</p>
+                </div>
+                
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                    <h3>Community Pulse Engine</h3>
+                    <p>A real-time macro-view of the platform's ecosystem. Automatically tracks trending queries and global sentiment indices.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>REDINTEL v1.0.4 | Data-Driven Audience Research</p>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -60,6 +60,14 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
     });
   }
 
+  void _onViewHistoryProfile(RedditProfile profile) {
+    _navigateTo(AppState.dashboard, profile: profile);
+  }
+
+  void _onReScan(String username) {
+    _navigateTo(AppState.scanning, username: username);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
@@ -90,6 +98,8 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
         return NavigationShell(
           key: const ValueKey('navigation_shell'),
           onSearch: (username) => _navigateTo(AppState.scanning, username: username),
+          onViewProfile: _onViewHistoryProfile,
+          onReScan: _onReScan,
         );
       case AppState.scanning:
         return ScanningPage(

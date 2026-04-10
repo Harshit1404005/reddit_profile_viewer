@@ -5,7 +5,14 @@ import '../widgets/glass_panel.dart';
 import '../services/cache_service.dart';
 
 class HistoryPage extends StatelessWidget {
-  const HistoryPage({super.key});
+  final Function(RedditProfile) onViewProfile;
+  final Function(String) onReScan;
+
+  const HistoryPage({
+    super.key, 
+    required this.onViewProfile, 
+    required this.onReScan
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +46,19 @@ class HistoryPage extends StatelessWidget {
             else
               ...history.map((p) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: _buildHistoryItem(
-                  context, 
-                  'u/${p.username}', 
-                  p.accountAge, 
-                  p.recentComments.isNotEmpty 
-                      ? p.recentComments.take(2).map((c) => c.subreddit.replaceAll('r/', '')).join(', ')
-                      : 'GENERAL', 
-                  p.status == 'HIDDEN' ? AppTheme.error : AppTheme.primary
+                child: InkWell(
+                  onTap: () => onViewProfile(p),
+                  borderRadius: BorderRadius.circular(24),
+                  child: _buildHistoryItem(
+                    context, 
+                    'u/${p.username}', 
+                    p.accountAge, 
+                    p.recentComments.isNotEmpty 
+                        ? p.recentComments.take(2).map((c) => c.subreddit.replaceAll('r/', '')).join(', ')
+                        : 'GENERAL', 
+                    p.status == 'HIDDEN' ? AppTheme.error : AppTheme.primary,
+                    () => onReScan(p.username),
+                  ),
                 ),
               )),
           ],
@@ -55,7 +67,7 @@ class HistoryPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryItem(BuildContext context, String user, String age, String sectors, Color color) {
+  Widget _buildHistoryItem(BuildContext context, String user, String age, String sectors, Color color, VoidCallback onReScan) {
     return GlassPanel(
       padding: const EdgeInsets.all(24),
       borderRadius: 24,
@@ -83,10 +95,13 @@ class HistoryPage extends StatelessWidget {
             children: [
               Text(age, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.primary)),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(color: AppTheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(20)),
-                child: const Text('RE-SCAN', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+              GestureDetector(
+                onTap: onReScan,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(color: AppTheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(20)),
+                  child: const Text('RE-SCAN', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
               ),
             ],
           ),
