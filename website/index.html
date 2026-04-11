@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RedIntel Insights | Deep Reddit Analytics</title>
+    <title>PersonaPulse | Behavioral Signals for Reddit Profiles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet">
@@ -55,6 +55,7 @@
         h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
         .gradient-text {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -134,19 +135,21 @@
             gap: 1rem;
             max-width: 450px;
         }
-        .waitlist-input {
-            flex: 1;
+        .waitlist-input, .waitlist-textarea {
+            width: 100%;
             background: var(--surface);
             border: 1px solid var(--surface-highest);
             padding: 1rem 1.5rem;
-            border-radius: 16px;
+            border-radius: 12px;
             color: white;
             font-size: 1rem;
             outline: none;
             transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
         }
-        .waitlist-input:focus { border-color: var(--primary); }
+        .waitlist-input:focus, .waitlist-textarea:focus { border-color: var(--primary); }
         .waitlist-submit {
+            width: 100%;
             background: linear-gradient(135deg, var(--primary), #b388ff);
             color: var(--bg-color);
             border: none;
@@ -162,21 +165,45 @@
             box-shadow: 0 10px 20px rgba(220, 184, 255, 0.3);
         }
         
-        .hero-image-wrapper {
+        /* SaaS Mockup Frame */
+        .mockup-wrapper {
             position: relative;
-            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+            transform: perspective(1000px) rotateY(-8deg) rotateX(4deg);
             transition: transform 0.5s ease;
+            animation: float 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(165, 200, 255, 0.2));
         }
-        .hero-image-wrapper:hover {
-            transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+        .mockup-wrapper:hover {
+            transform: perspective(1000px) rotateY(-4deg) rotateX(2deg);
+        }
+        .mockup-frame {
+            background: var(--surface-highest);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .mockup-header {
+            background: #1e1e1e;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
         .hero-image {
             width: 100%;
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(220, 184, 255, 0.2);
-            filter: drop-shadow(0 0 20px rgba(165, 200, 255, 0.2));
-            animation: float 6s ease-in-out infinite;
+            height: auto;
+            max-height: 600px;
+            object-fit: cover;
+            object-position: top;
+            display: block;
         }
 
         @keyframes float {
@@ -291,59 +318,137 @@
         <nav>
             <div class="logo">
                 <i class="fa-solid fa-layer-group"></i>
-                REDINTEL
+                PERSONAPULSE
             </div>
-            <button class="request-btn">Request Access</button>
+            <button class="request-btn" onclick="document.querySelector('.waitlist-input').focus()">Join Waitlist</button>
         </nav>
 
         <!-- Hero Section -->
         <div class="hero">
             <div class="hero-content">
-                <div class="status-badge">
-                    <div class="pulse"></div>
-                    BETA V1.0.4 - LIVE
+                <div class="status-badge" style="background: rgba(255, 171, 64, 0.1); border-color: rgba(255, 171, 64, 0.3); color: #FFAB40;">
+                    <div class="pulse" style="background: #FFAB40; box-shadow: 0 0 10px #FFAB40;"></div>
+                    IN DEVELOPMENT - JOIN WAITLIST
                 </div>
-                <h1>Deep Reddit <br><span class="gradient-text">Audience Analytics</span></h1>
-                <p>Professional-grade audience intelligence. Transform fragmented social data into structured, actionable demographic dossiers.</p>
+                <h1>Know Exactly Who Your <br><span class="gradient-text">Reddit Audience Is</span></h1>
+                <p>An elite analytics tool for marketers and agencies. Turn chaotic, anonymous Reddit behavior into crystal-clear demographic profiles, instantly.</p>
                 
-                <form class="waitlist-form" onsubmit="event.preventDefault(); alert('Thanks for joining the RedIntel Beta waitlist!');">
-                    <input type="email" class="waitlist-input" placeholder="Enter your work email..." required>
-                    <button type="submit" class="waitlist-submit">Join Beta</button>
+                <form class="waitlist-form" style="flex-direction: column;" action="https://formspree.io/f/YOUR_FORM_ID_HERE" method="POST">
+                    <input type="email" name="email" class="waitlist-input" placeholder="Your work email..." required>
+                    <textarea name="feedback" class="waitlist-textarea" placeholder="Optional: What is your biggest challenge with Reddit audience research right now?" rows="3" style="resize: vertical;"></textarea>
+                    <button type="submit" class="waitlist-submit">Join the Waitlist</button>
+                    <p style="font-size: 0.75rem; color: #666; text-align: center; margin-top: -0.5rem;">If you do not have a Formspree ID yet, this will fail. Replace 'YOUR_FORM_ID_HERE' in the code when ready.</p>
                 </form>
-                <p style="font-size: 0.8rem; margin-top: 1rem; color: #888;">Used by top community managers & researchers.</p>
+                <p style="font-size: 0.8rem; margin-top: 1rem; color: #888;">Trusted by data-driven community managers & PR firms.</p>
             </div>
             
-            <div class="hero-image-wrapper">
-                <img src="hero.png" alt="RedIntel Dashboard Interface" class="hero-image">
+            <div class="mockup-wrapper">
+                <div class="mockup-frame">
+                    <div class="mockup-header">
+                        <div class="mockup-dot" style="background: #ff5f56;"></div>
+                        <div class="mockup-dot" style="background: #ffbd2e;"></div>
+                        <div class="mockup-dot" style="background: #27c93f;"></div>
+                    </div>
+                    <img src="assets/polished_hero.png" alt="PersonaPulse Dashboard Interface" class="hero-image">
+                </div>
             </div>
         </div>
 
-        <!-- Features Section -->
-        <div class="features">
-            <h2>Core Analytical Capabilities</h2>
-            <div class="features-grid">
+        <!-- Real Product Showcase -->
+        <div class="features" style="margin-top: 4rem;">
+            <h2 style="margin-bottom: 2rem;">Inside the <span class="gradient-text">Intelligence Engine</span></h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 4rem;">Every byte of data, visualized for agency-grade clarity.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                <div class="glass-panel" style="overflow: hidden; border-radius: 16px;">
+                    <img src="assets/Screenshot_20260411_011406.jpg" alt="Trends Analysis" style="width: 100%; height: 400px; object-fit: cover; object-position: top;">
+                    <div style="padding: 1.5rem;">
+                        <h4 style="color: var(--primary);">Global Signals</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Real-time popularity vectors and sentiment analysis.</p>
+                    </div>
+                </div>
+                <div class="glass-panel" style="overflow: hidden; border-radius: 16px;">
+                    <img src="assets/Screenshot_20260411_011301.jpg" alt="Profile Analytics" style="width: 100%; height: 400px; object-fit: cover; object-position: top;">
+                    <div style="padding: 1.5rem;">
+                        <h4 style="color: var(--secondary);">Deep Archeology</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Analyzing deleted content and hidden archive history.</p>
+                    </div>
+                </div>
+                <div class="glass-panel" style="overflow: hidden; border-radius: 16px;">
+                    <img src="assets/Screenshot_20260411_011521.jpg" alt="Saved Insights" style="width: 100%; height: 400px; object-fit: cover; object-position: top;">
+                    <div style="padding: 1.5rem;">
+                        <h4 style="color: var(--tertiary);">Saved Dossiers</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Your organized clinical history of target profiles.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it Works / Features Section -->
+        <div class="features" style="margin-top: 8rem;">
+            <h2>How PersonaPulse Gives You The Edge</h2>
+            <p style="text-align: center; color: var(--text-secondary); max-width: 700px; margin: -2rem auto 4rem auto; font-size: 1.1rem;">
+                Traditional tools tell you *how many* people are talking. We tell you exactly *who* is talking. 
+            </p>
+            
+            <div class="features-grid" style="grid-template-columns: repeat(2, 1fr);">
                 <div class="glass-panel feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-network-wired"></i></div>
-                    <h3>Unified Sourcing</h3>
-                    <p>Aggregates complex history by utilizing a parallel data-fetch pipeline containing active endpoints and legacy historical archives.</p>
+                    <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                    <h3>1. Deep Profile Scanning</h3>
+                    <p>Stop scrolling through endless histories. Simply enter a Reddit username, and our engine scans their entire lifespan—even pulling up archived content—to give you a complete picture.</p
                 </div>
                 
                 <div class="glass-panel feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                    <h3>Live Behavioral Synthesis</h3>
-                    <p>Real-time sector engagement breakdowns. Instantly calculate activity commitment and categorize community participation interaction tones.</p>
+                    <h3>2. Personality & Brand-Safety Radar</h3>
+                    <p>Is this user safe for your brand to associate with? Our AI calculates toxicity, flags adult interactions, and shows community engagement via high-clarity visualizations.</p>
                 </div>
                 
                 <div class="glass-panel feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-satellite-dish"></i></div>
-                    <h3>Community Pulse Engine</h3>
-                    <p>A real-time macro-view of the platform's ecosystem. Automatically tracks trending queries and global sentiment indices.</p>
+                    <div class="feature-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                    <h3>3. Instant 1-Click Agency Reports</h3>
+                    <p>Don't waste time making PowerPoints. Click "Export" to instantly generate a stunning, white-labeled PDF report summarizing the target's demographic and brand safety profile.</p>
+                </div>
+
+                <div class="glass-panel feature-card" style="border: 1px solid var(--tertiary); position: relative; overflow: hidden; background: rgba(76, 227, 70, 0.05);">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--tertiary);"></div>
+                    <div class="feature-icon" style="color: var(--tertiary); background: rgba(76, 227, 70, 0.1);"><i class="fa-solid fa-globe"></i></div>
+                    <h3 style="display: flex; align-items: center; gap: 12px; font-size: 1.3rem;">
+                        4. Macro Topic Tracking
+                        <span style="font-size: 0.6rem; background: var(--tertiary); color: var(--bg-color); padding: 4px 8px; border-radius: 12px; font-weight: 900; letter-spacing: 1px;">COMING IN PHASE 2</span>
+                    </h3>
+                    <p>Don't just search users—search *Topics*. Discover the top 50 influencers for any keyword and gauge sentiment across hidden niche communities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use Cases Section -->
+        <div class="features" style="margin-top: 6rem; padding: 4rem; background: var(--surface); border-radius: 32px; border: 1px solid var(--surface-highest); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <h2 style="margin-bottom: 2rem;">Why Agencies Are Joining The Waitlist</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem;">
+                <div>
+                    <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 1.2rem;">🛡️ PR Crisis Management</h4>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+                        A viral Reddit post is trashing your client's product. Is the poster a genuine unhappy customer who needs a refund, or a competitor's coordinated troll? PersonaPulse scans their profile and uncovers their real agenda instantly so you can respond correctly.
+                    </p>
+                </div>
+                <div>
+                    <h4 style="color: var(--secondary); margin-bottom: 12px; font-size: 1.2rem;">🤝 Influencer Vetting</h4>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+                        Reddit influencers are incredibly powerful, but highly risky. Before paying a user to promote your brand, use PersonaPulse to ensure they are brand safe. Prove to your client that the influencer has zero toxicity and actively posts in your target zip codes/interests.
+                    </p>
+                </div>
+                <div>
+                    <h4 style="color: var(--tertiary); margin-bottom: 12px; font-size: 1.2rem;">💼 B2B Lead Generation</h4>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+                        Reverse-engineer your most lucrative leads. If you are selling software to a CTO, scan their Reddit profile. Discover exactly what tech tools they complain about on weekends, giving your sales team the perfect, personalized ice-breaker email.
+                    </p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>REDINTEL v1.0.4 | Data-Driven Audience Research</p>
+            <p>PERSONAPULSE v1.0.4 | Data-Driven Audience Research</p>
         </div>
     </div>
 

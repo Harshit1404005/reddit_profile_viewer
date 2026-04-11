@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/reddit_models.dart';
+import '../services/reddit_service.dart';
 
 class CacheService {
   static const String profileBoxName = 'reddit_profiles_v1';
@@ -44,6 +45,16 @@ class CacheService {
 
   /// Retrieve all cached profiles sorted by most recent
   static List<RedditProfile> getHistory() {
+    if (RedditService.marketingDemoMode) {
+      return [
+        RedditProfile(username: 'B2B_SaaS_Founder', totalKarma: 142580, accountAge: '8Y 6M', status: 'HIGH VALUE TARGET', toxicity: 0.12, nsfw: 0.05, controversialIndex: 0.18, recentPosts: [], recentComments: []),
+        RedditProfile(username: 'Crypto_Whale_99', totalKarma: 85200, accountAge: '4Y 2M', status: 'INFLUENCER', toxicity: 0.0, nsfw: 0.0, controversialIndex: 0.0, recentPosts: [], recentComments: []),
+        RedditProfile(username: 'TechLead_Google', totalKarma: 34500, accountAge: '6Y 1M', status: 'LEAD', toxicity: 0.05, nsfw: 0.0, controversialIndex: 0.1, recentPosts: [], recentComments: []),
+        RedditProfile(username: 'Angry_Customer_22', totalKarma: 120, accountAge: '2M', status: 'CRISIS RISK', toxicity: 0.85, nsfw: 0.0, controversialIndex: 0.9, recentPosts: [], recentComments: []),
+        RedditProfile(username: 'Angel_Investor_X', totalKarma: 210000, accountAge: '10Y', status: 'VIP', toxicity: 0.0, nsfw: 0.0, controversialIndex: 0.0, recentPosts: [], recentComments: []),
+      ];
+    }
+    
     final box = Hive.box<RedditProfile>(profileBoxName);
     return box.values.toList().reversed.toList();
   }

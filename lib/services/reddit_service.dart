@@ -20,6 +20,8 @@ abstract class RedditService {
   String get mode;
 
   // ─── Global Toggle ───────────────────────────────────────────────────────────
+  // Change this to true to return hyper-rich, fake data ideal for marketing screenshots.
+  static bool marketingDemoMode = false; 
   // Change this one line to switch the data source everywhere in the app.
   static DataSource currentDataSource = DataSource.pullpush;
 
@@ -158,6 +160,15 @@ class PullPushRedditService extends RedditService {
 
   @override
   Future<Map<String, dynamic>> getGlobalPulse() async {
+    if (RedditService.marketingDemoMode) {
+      return {
+        'subreddits': ['CYBERSECURITY', 'SAAS', 'MARKETING', 'B2B_SALES', 'STARTUPS'],
+        'keywords': ['AI AGENTS', 'LEAD GEN', 'AUTOMATION', 'REVENUE', 'CONVERSIONS', 'OUTREACH', 'DEMOGRAPHICS'],
+        'sentiment': 'BULLISH',
+        'active_count': '18.4M+',
+      };
+    }
+    
     try {
       // Hit the Cloudflare worker to aggregate trending signals (Strategic Hit)
       final response = await _ghost.get('/api/reddit/all/hot?limit=50').catchError((_) => _reddit.get('/r/all/hot.json?limit=50'));
@@ -201,6 +212,31 @@ class PullPushRedditService extends RedditService {
 
   @override
   Future<RedditProfile> analyzeUser(String username) async {
+    if (RedditService.marketingDemoMode) {
+      await Future.delayed(const Duration(seconds: 2)); // Simulate network load
+      return RedditProfile(
+        username: username,
+        totalKarma: 142580,
+        accountAge: '8Y 6M',
+        status: 'HIGH VALUE TARGET',
+        toxicity: 0.12,
+        nsfw: 0.05,
+        controversialIndex: 0.18,
+        recentPosts: [
+          RedditPost(id: 'p1', title: 'Exploring AI integration in modern B2B SaaS pipelines. What are the best frameworks?', subreddit: 'SaaS', ups: 1450, numComments: 142, rawTimestamp: 1712852230, time: '2h ago', url: '', source: 'ARCHIVE', isNsfw: false),
+          RedditPost(id: 'p2', title: 'We scaled our agency to \$10M ARR using automated OSINT lead generation workflows.', subreddit: 'Entrepreneur', ups: 3200, numComments: 450, rawTimestamp: 1712851230, time: '1d ago', url: '', source: 'PUBLIC', isNsfw: false),
+          RedditPost(id: 'p3', title: 'The decline of manual marketing research. Why data synthesis is the future.', subreddit: 'marketing', ups: 850, numComments: 89, rawTimestamp: 1712851000, time: '4d ago', url: '', source: 'ARCHIVE', isNsfw: false),
+        ],
+        recentComments: [
+          RedditComment(id: 'c1', body: 'The cost of acquiring a customer is too high without pre-qualifying them via deep audience demographics.', subreddit: 'B2B_Sales', ups: 450, rawTimestamp: 1712852200, time: '1h ago', source: 'PUBLIC', isControversial: false),
+          RedditComment(id: 'c2', body: 'Exactly. Using proxy-based intelligence gathering completely changed our cold outreach response rates.', subreddit: 'CyberSecurity', ups: 210, rawTimestamp: 1712851900, time: '5h ago', source: 'PUBLIC', isControversial: false),
+          RedditComment(id: 'c3', body: 'We switched from generic scrapers to a unified parallel data-fetch pipeline and it reduced latency by 80%.', subreddit: 'DataScience', ups: 85, rawTimestamp: 1712850000, time: '1d ago', source: 'ARCHIVE', isControversial: false),
+          RedditComment(id: 'c4', body: 'Do not use simple API calls for this, reddit rate limits are brutal for marketing scripts. You have to route through Cloudflare workers.', subreddit: 'SaaS', ups: 120, rawTimestamp: 1712849000, time: '2d ago', source: 'PUBLIC', isControversial: true),
+        ],
+        afterToken: null,
+      );
+    }
+
     final sw = Stopwatch()..start();
 
     // 0 ── Check Cache

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../services/reddit_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 import '../services/cache_service.dart';
@@ -19,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   final RedditService _redditService = RedditService.create();
   Map<String, dynamic> _metrics = {};
   Map<String, dynamic> _pulse = {};
+  final TextEditingController _controller = TextEditingController();
   bool _loadingPulse = true;
 
   @override
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage> {
             elevation: 0,
             leading: null,
             title: Text(
-              'REDINTEL INSIGHTS',
+              'PERSONAPULSE',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primary,
                     letterSpacing: 2,

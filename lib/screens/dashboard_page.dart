@@ -171,8 +171,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
             title: Text(
-              'Profile Analytics',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 1),
+              'PersonaPulse',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
             ),
             actions: [
               if (MediaQuery.of(context).size.width < 600)

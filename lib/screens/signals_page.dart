@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../services/reddit_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 
