@@ -65,7 +65,7 @@ class _NavigationShellState extends State<NavigationShell> {
           children: [
             _buildNavItem(context, 0, FontAwesomeIcons.magnifyingGlass, 'SEARCH'),
             _buildNavItem(context, 1, FontAwesomeIcons.clockRotateLeft, 'HISTORY'),
-            _buildNavItem(context, 2, FontAwesomeIcons.chartLine, 'TRENDS'),
+            _buildNavItem(context, 2, FontAwesomeIcons.satelliteDish, 'MARKET'),
             _buildNavItem(context, 3, FontAwesomeIcons.gear, 'SETTINGS'),
           ],
         ),

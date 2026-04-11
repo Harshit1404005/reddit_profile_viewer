@@ -1,0 +1,45 @@
+=================================================
+TITLE: How do PR and Marketing folks actually vet Reddit influencers? (Validating a new analytics tool)
+TARGET SUBREDDIT: r/Marketing or r/SocialMedia
+=================================================
+Reddit is a goldmine for B2B leads and influencer marketing, but the anonymity makes it incredibly risky. If a viral Reddit post is trashing your client's SaaS product, how do you know if it's a genuine customer or a competitor’s troll? Worse, if you actually pay a Reddit influencer to talk about your brand, how do you prove to your client they are brand safe?
+
+Traditional social listening tools tell you *how many* people are talking. I wanted to build a tool that tells you exactly *who* is talking. 
+
+It's called PersonaPulse. It’s an intelligence engine designed to instantly scan a Reddit user's entire lifespan and aggregate their behavioral signals. 
+* PR Crisis Management: Instantly uncover a user's real agenda and history.
+* Influencer Vetting: Ensure absolute brand safety with built-in AI toxicity and NSFW-content radars.
+* B2B Lead Gen: Reverse-engineer your most lucrative leads by finding out exactly what tech tools they complain about on weekends.
+
+I just threw up a raw landing page showing off the core UI. I'm currently looking for early feedback from actual marketers and PR folks before I finish fully developing the backend. 
+
+Does a tool like this actually solve a pain point for you? I’d love your brutal honesty.
+Waitlist / Landing page is here: [YOUR_CLOUDFLARE_LINK_HERE]
+
+
+=================================================
+TITLE: Stop guessing who your Reddit audience is (Need feedback on my MVP landing page)
+TARGET SUBREDDIT: r/SaaS or r/SideProject or r/RoastMyStartup
+=================================================
+Hey everyone! 👋 
+
+I noticed marketers and founders spend hours manually scrolling through Reddit profiles trying to figure out if a user is a genuine B2B lead, a coordinated troll, or a brand-safe influencer. 
+
+I’m currently building PersonaPulse, an intelligence engine that turns chaotic, anonymous Reddit behavior into crystal-clear demographic profiles instantly. 
+
+With 1 combined search you get:
+🔍 Deep Profile Scanning (even deleted/archived history)
+🛑 Personality & Brand-Safety Radar (Automated Toxicity scoring)
+📊 Instant Exportable Agency Reports 
+
+I’m currently validating the idea and building out the early-access features. Since this subreddit gives the best (and most brutal) feedback on the internet, I wanted to show you the landing page first.
+
+Please completely roast my landing page, the feature set, or just let me know if you would actually use this.
+Link: [YOUR_CLOUDFLARE_LINK_HERE]
+
+=================================================
+QUICK TIPS FOR REDDIT:
+1. Don't post these on the exact same day, space them out.
+2. If you get comments, reply to ALL of them! Reddit's algorithm pushes posts up when the creator is actively replying.
+3. Don't forget to replace [YOUR_CLOUDFLARE_LINK_HERE] with your actual `.pages.dev` or `.workers.dev` link.
+=================================================

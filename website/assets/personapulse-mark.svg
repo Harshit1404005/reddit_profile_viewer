@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="88" y1="72" x2="424" y2="440" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#201C31"/>
+      <stop offset="1" stop-color="#12141F"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="146" y1="128" x2="373" y2="366" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCB8FF"/>
+      <stop offset="0.58" stop-color="#A5C8FF"/>
+      <stop offset="1" stop-color="#4CE346"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="155" y1="116" x2="382" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0D6FF"/>
+      <stop offset="1" stop-color="#8CB8FF"/>
+    </linearGradient>
+    <filter id="shadow" x="36" y="28" width="440" height="456" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="22"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0235294 0 0 0 0 0.0470588 0 0 0 0 0.105882 0 0 0 0.6 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="72" width="352" height="352" rx="92" fill="url(#bg)"/>
+    <rect x="81.5" y="73.5" width="349" height="349" rx="90.5" stroke="url(#ring)" stroke-opacity="0.12" stroke-width="3"/>
+
+    <circle cx="256" cy="186" r="40" fill="url(#accent)"/>
+    <path d="M175 319C175 279.788 206.788 248 246 248H266C305.212 248 337 279.788 337 319V326C337 334.837 329.837 342 321 342H191C182.163 342 175 334.837 175 326V319Z" fill="url(#accent)"/>
+
+    <circle cx="256" cy="256" r="118" stroke="url(#ring)" stroke-width="18" stroke-linecap="round" stroke-opacity="0.22"/>
+    <path d="M134 276C154 239 191 214 234 211C261 209 280 215 300 227C318 238 333 255 342 276" stroke="url(#ring)" stroke-width="18" stroke-linecap="round" stroke-opacity="0.32"/>
+
+    <path d="M119 261H172L204 222L241 301L278 184L312 261H393" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="391" cy="261" r="13" fill="#4CE346"/>
+  </g>
+</svg>
