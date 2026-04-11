@@ -253,8 +253,18 @@
         }
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 2rem;
+        }
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .usecase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
         }
         .feature-card {
             padding: 2.5rem;
@@ -300,7 +310,6 @@
             .hero-content h1 { font-size: 3rem; }
             .hero-content p { margin: 0 auto 2rem auto; }
             .waitlist-form { margin: 0 auto; flex-direction: column;}
-            .features-grid { grid-template-columns: 1fr; }
             .hero-image-wrapper { transform: none; }
             .hero-image-wrapper:hover { transform: none; }
         }
@@ -358,7 +367,7 @@
             <h2 style="margin-bottom: 2rem;">Inside the <span class="gradient-text">Intelligence Engine</span></h2>
             <p style="text-align: center; color: var(--text-secondary); margin-bottom: 4rem;">Every byte of data, visualized for agency-grade clarity.</p>
             
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+            <div class="showcase-grid">
                 <div class="glass-panel" style="overflow: hidden; border-radius: 16px;">
                     <img src="assets/Screenshot_20260411_011406.jpg" alt="Trends Analysis" style="width: 100%; height: 400px; object-fit: cover; object-position: top;">
                     <div style="padding: 1.5rem;">
@@ -390,11 +399,11 @@
                 Traditional tools tell you *how many* people are talking. We tell you exactly *who* is talking. 
             </p>
             
-            <div class="features-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="features-grid">
                 <div class="glass-panel feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
                     <h3>1. Deep Profile Scanning</h3>
-                    <p>Stop scrolling through endless histories. Simply enter a Reddit username, and our engine scans their entire lifespan—even pulling up archived content—to give you a complete picture.</p
+                    <p>Stop scrolling through endless histories. Simply enter a Reddit username, and our engine scans their entire lifespan—even pulling up archived content—to give you a complete picture.</p>
                 </div>
                 
                 <div class="glass-panel feature-card">
@@ -424,7 +433,7 @@
         <!-- Use Cases Section -->
         <div class="features" style="margin-top: 6rem; padding: 4rem; background: var(--surface); border-radius: 32px; border: 1px solid var(--surface-highest); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
             <h2 style="margin-bottom: 2rem;">Why Agencies Are Joining The Waitlist</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem;">
+            <div class="usecase-grid">
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 1.2rem;">🛡️ PR Crisis Management</h4>
                     <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
