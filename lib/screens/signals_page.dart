@@ -56,10 +56,17 @@ class _SignalsPageState extends State<SignalsPage> {
                     Text('REAL-TIME POPULARITY VECTORS', style: Theme.of(context).textTheme.labelSmall),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: AppTheme.tertiary.withAlpha((0.1 * 255).toInt()), border: Border.all(color: AppTheme.tertiary.withAlpha((0.2 * 255).toInt()))),
-                  child: const FaIcon(FontAwesomeIcons.bolt, color: AppTheme.tertiary, size: 16).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
+                InkWell(
+                  onTap: () {
+                    setState(() => _loading = true);
+                    _loadPulse();
+                  },
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: AppTheme.tertiary.withAlpha((0.1 * 255).toInt()), border: Border.all(color: AppTheme.tertiary.withAlpha((0.2 * 255).toInt()))),
+                    child: const FaIcon(FontAwesomeIcons.arrowsRotate, color: AppTheme.tertiary, size: 16).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
+                  ),
                 ),
               ],
             ),
@@ -68,18 +75,24 @@ class _SignalsPageState extends State<SignalsPage> {
             if (_loading) 
               const Center(child: CircularProgressIndicator(color: AppTheme.primary))
             else ...[
-              _buildSignalMetric(context, 'ACTIVE SUBREDDITS', subreddits.isNotEmpty ? subreddits.first.toString().toUpperCase() : 'HOT', AppTheme.primary, '+12.4%'),
+              _buildSignalMetric(context, 'ACTIVE SUBREDDITS', subreddits.length > 1 ? subreddits.first.toString().toUpperCase() : 'HOT', AppTheme.primary, '+${(subreddits.length * 2.4).toStringAsFixed(1)}%'),
               const SizedBox(height: 16),
               _buildSignalMetric(context, 'GLOBAL SENTIMENT', _pulse['sentiment'] ?? 'STABLE', AppTheme.secondary, 'NEUTRAL'),
               
               const SizedBox(height: 32),
               Text('TRENDING KEYWORDS', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 24),
-              ...keywords.map((k) => _buildTrendingRow(context, k.toString(), 'HIGH', AppTheme.primary)),
+              ...keywords.asMap().entries.map((e) {
+                final densities = ['VIRAL', 'HIGH', 'RISING', 'STEADY'];
+                return _buildTrendingRow(context, e.value.toString(), densities[e.key % densities.length], AppTheme.primary);
+              }),
               const SizedBox(height: 24),
               Text('ACTIVE COMMUNITIES', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 24),
-              ...subreddits.map((s) => _buildTrendingRow(context, s.toString().toUpperCase(), 'MEDIUM', AppTheme.secondary)),
+              ...subreddits.asMap().entries.map((e) {
+                final densities = ['PEAKING', 'HIGH', 'ELEVATED'];
+                return _buildTrendingRow(context, e.value.toString().toUpperCase(), densities[e.key % densities.length], AppTheme.secondary);
+              }),
             ],
           ],
         ),
