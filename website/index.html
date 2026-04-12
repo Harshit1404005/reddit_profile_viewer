@@ -305,6 +305,110 @@
             color: var(--text-secondary);
             font-size: 0.95rem;
         }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .metric-card {
+            padding: 1.5rem;
+            text-align: left;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(220, 184, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .metric-value {
+            display: block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.35rem;
+        }
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .process-card {
+            padding: 2rem;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .process-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(165, 200, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .process-step {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg-color);
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        .cta-banner {
+            margin-top: 6rem;
+            padding: 3rem;
+            background:
+                radial-gradient(circle at top left, rgba(220, 184, 255, 0.16), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(165, 200, 255, 0.16), transparent 34%),
+                rgba(31, 31, 38, 0.88);
+        }
+        .cta-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        .cta-points {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 1.25rem;
+        }
+        .cta-points div {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            color: var(--text-secondary);
+        }
+        .cta-points i {
+            color: var(--primary);
+            margin-top: 0.25rem;
+        }
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .faq-item {
+            padding: 1.75rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .faq-item:hover {
+            transform: translateY(-3px);
+            border-color: rgba(76, 227, 70, 0.3);
+        }
+        .faq-item h4 {
+            margin-bottom: 0.7rem;
+        }
+        .faq-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
         
         .footer {
             text-align: center;
@@ -321,6 +425,7 @@
             .hero-content h1 { font-size: 3rem; }
             .hero-content p { margin: 0 auto 2rem auto; }
             .waitlist-form { margin: 0 auto; flex-direction: column;}
+            .cta-grid { grid-template-columns: 1fr; }
             .hero-image-wrapper { transform: none; }
             .hero-image-wrapper:hover { transform: none; }
         }
@@ -350,15 +455,16 @@
                     <div class="pulse" style="background: #FFAB40; box-shadow: 0 0 10px #FFAB40;"></div>
                     IN DEVELOPMENT - JOIN WAITLIST
                 </div>
-                <h1>Know Exactly Who Your <br><span class="gradient-text">Reddit Audience Is</span></h1>
-                <p>An elite analytics tool for marketers and agencies. Turn chaotic, anonymous Reddit behavior into crystal-clear demographic profiles, instantly.</p>
+                <h1>Turn Anonymous Reddit Activity Into <br><span class="gradient-text">Clear Buyer Intelligence</span></h1>
+                <p>PersonaPulse helps agencies, researchers, and growth teams understand who is behind the posts, what communities shape them, and whether a profile is worth tracking, trusting, or avoiding.</p>
                 
                 <form class="waitlist-form" style="flex-direction: column;" action="https://formspree.io/f/mlgoqdan" method="POST">
                     <input type="email" name="email" class="waitlist-input" placeholder="Your work email..." required>
-                    <textarea name="message" class="waitlist-textarea" placeholder="Optional: What is your biggest challenge with Reddit audience research right now?" rows="3" style="resize: vertical;"></textarea>
+                    <input type="text" name="team" class="waitlist-input" placeholder="Team, agency, or company name">
+                    <textarea name="message" class="waitlist-textarea" placeholder="What is your biggest challenge with Reddit audience research right now?" rows="3" style="resize: vertical;"></textarea>
                     <button type="submit" class="waitlist-submit">Join the Waitlist</button>
                 </form>
-                <p style="font-size: 0.8rem; margin-top: 1rem; color: #888;">Trusted by data-driven community managers & PR firms.</p>
+                <p style="font-size: 0.85rem; margin-top: 1rem; color: #9e94aa;">Early users get launch updates, beta invites, and a chance to shape the workflows we build first.</p>
             </div>
             
             <div class="mockup-wrapper">
@@ -370,6 +476,29 @@
                     </div>
                     <img src="assets/polished_hero.png" alt="PersonaPulse Dashboard Interface" class="hero-image">
                 </div>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="glass-panel metric-card">
+                <i class="fa-solid fa-dna" style="color: var(--primary); font-size: 1.2rem; margin-bottom: 0.75rem; display: block;"></i>
+                <span class="metric-value">Profile DNA</span>
+                <span class="metric-label">Behavior, interests, and community patterns in one place.</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <i class="fa-solid fa-shield-virus" style="color: var(--secondary); font-size: 1.2rem; margin-bottom: 0.75rem; display: block;"></i>
+                <span class="metric-value">Brand Safety</span>
+                <span class="metric-label">Spot risky signals before outreach, partnerships, or PR response.</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <i class="fa-solid fa-bolt" style="color: var(--tertiary); font-size: 1.2rem; margin-bottom: 0.75rem; display: block;"></i>
+                <span class="metric-value">Fast Reports</span>
+                <span class="metric-label">Turn messy research into polished client-ready summaries.</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <i class="fa-solid fa-crosshairs" style="color: #ffbd2e; font-size: 1.2rem; margin-bottom: 0.75rem; display: block;"></i>
+                <span class="metric-value">Actionable</span>
+                <span class="metric-label">Built for agencies, growth teams, and researchers who need answers quickly.</span>
             </div>
         </div>
 
@@ -414,7 +543,7 @@
                 <div class="glass-panel feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
                     <h3>1. Deep Profile Scanning</h3>
-                    <p>Stop scrolling through endless histories. Simply enter a Reddit username, and our engine scans their entire lifespan—even pulling up archived content—to give you a complete picture.</p>
+                    <p>Stop scrolling through endless histories. Enter a Reddit username and get a structured view of behavior, communities, and historical activity in one place.</p>
                 </div>
                 
                 <div class="glass-panel feature-card">
@@ -439,29 +568,92 @@
                     <p>Track product mentions, detect viral spikes, and map community context. See exactly what Reddit thinks about your brand before your competitors do.</p>
                 </div>
             </div>
+
+            <div class="process-grid">
+                <div class="glass-panel process-card">
+                    <div class="process-step">01</div>
+                    <h3 style="margin-bottom: 0.75rem;">Drop in a profile</h3>
+                    <p style="color: var(--text-secondary);">Start with a Reddit username and let PersonaPulse gather the signals that matter without manual thread-hopping.</p>
+                </div>
+                <div class="glass-panel process-card">
+                    <div class="process-step">02</div>
+                    <h3 style="margin-bottom: 0.75rem;">Read the behavior fast</h3>
+                    <p style="color: var(--text-secondary);">See topic patterns, activity intensity, potential risk, and community fit in a dashboard designed for quick interpretation.</p>
+                </div>
+                <div class="glass-panel process-card">
+                    <div class="process-step">03</div>
+                    <h3 style="margin-bottom: 0.75rem;">Turn insight into action</h3>
+                    <p style="color: var(--text-secondary);">Use the profile for outreach, vetting, PR response, research, or export a shareable dossier for your team.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Use Cases Section -->
         <div class="features" style="margin-top: 6rem; padding: 4rem; background: var(--surface); border-radius: 32px; border: 1px solid var(--surface-highest); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
             <h2 style="margin-bottom: 2rem;">Why Agencies Are Joining The Waitlist</h2>
             <div class="usecase-grid">
-                <div>
-                    <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 1.2rem;">🛡️ PR Crisis Management</h4>
+                <div class="glass-panel" style="padding: 2rem; border-radius: 24px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='rgba(220,184,255,0.4)'" onmouseout="this.style.transform='none'; this.style.borderColor='var(--glass-border)'">
+                    <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 1.2rem;"><i class="fa-solid fa-shield-halved" style="margin-right: 10px;"></i>PR Crisis Management</h4>
                     <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
                         A viral Reddit post is trashing your client's product. Is the poster a genuine unhappy customer who needs a refund, or a competitor's coordinated troll? PersonaPulse scans their profile and uncovers their real agenda instantly so you can respond correctly.
                     </p>
                 </div>
-                <div>
-                    <h4 style="color: var(--secondary); margin-bottom: 12px; font-size: 1.2rem;">🤝 Influencer Vetting</h4>
+                <div class="glass-panel" style="padding: 2rem; border-radius: 24px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='rgba(165,200,255,0.4)'" onmouseout="this.style.transform='none'; this.style.borderColor='var(--glass-border)'">
+                    <h4 style="color: var(--secondary); margin-bottom: 12px; font-size: 1.2rem;"><i class="fa-solid fa-user-check" style="margin-right: 10px;"></i>Influencer Vetting</h4>
                     <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
                         Reddit influencers are incredibly powerful, but highly risky. Before paying a user to promote your brand, use PersonaPulse to ensure they are brand safe. Prove to your client that the influencer has zero toxicity and actively posts in your target zip codes/interests.
                     </p>
                 </div>
-                <div>
-                    <h4 style="color: var(--tertiary); margin-bottom: 12px; font-size: 1.2rem;">💼 B2B Lead Generation</h4>
+                <div class="glass-panel" style="padding: 2rem; border-radius: 24px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='rgba(76,227,70,0.4)'" onmouseout="this.style.transform='none'; this.style.borderColor='var(--glass-border)'">
+                    <h4 style="color: var(--tertiary); margin-bottom: 12px; font-size: 1.2rem;"><i class="fa-solid fa-bullseye" style="margin-right: 10px;"></i>B2B Lead Generation</h4>
                     <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
                         Reverse-engineer your most lucrative leads. If you are selling software to a CTO, scan their Reddit profile. Discover exactly what tech tools they complain about on weekends, giving your sales team the perfect, personalized ice-breaker email.
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel cta-banner">
+            <div class="cta-grid">
+                <div>
+                    <span style="color: var(--primary); text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.8rem; font-weight: 700;">Join Early</span>
+                    <h2 style="font-size: 2.4rem; text-align: left; margin: 0.75rem 0 1rem;">Get first access to the sharpest version of PersonaPulse.</h2>
+                    <p style="color: var(--text-secondary); max-width: 560px;">The waitlist is for teams who want a faster way to understand Reddit profiles, reduce research time, and get early access to the upcoming Market Intelligence Engine.</p>
+                    <div class="cta-points">
+                        <div><i class="fa-solid fa-check"></i><span>Priority beta invites as new capabilities roll out</span></div>
+                        <div><i class="fa-solid fa-check"></i><span>Direct roadmap updates and product previews</span></div>
+                        <div><i class="fa-solid fa-check"></i><span>A chance to shape the workflows we build for agencies and research teams</span></div>
+                    </div>
+                </div>
+                <form class="waitlist-form" style="max-width: none;" action="https://formspree.io/f/mlgoqdan" method="POST">
+                    <input type="email" name="email" class="waitlist-input" placeholder="Your work email..." required>
+                    <input type="text" name="role" class="waitlist-input" placeholder="Your role or use case">
+                    <textarea name="message" class="waitlist-textarea" placeholder="What would make PersonaPulse instantly valuable for you?" rows="4" style="resize: vertical;"></textarea>
+                    <button type="submit" class="waitlist-submit">Reserve My Spot</button>
+                    <p style="font-size: 0.85rem; color: #9e94aa;">No spam. Just launch updates, beta access, and product news.</p>
+                </form>
+            </div>
+        </div>
+
+        <div class="features" id="faq" style="margin-top: 6rem;">
+            <h2 style="margin-bottom: 1rem;">Questions Teams Ask Before Joining</h2>
+            <p style="text-align: center; color: var(--text-secondary); max-width: 760px; margin: 0 auto 2.5rem;">Clear positioning and low-friction answers help people commit. These are the questions most likely to come up before someone joins your waitlist.</p>
+            <div class="faq-grid">
+                <div class="glass-panel faq-item">
+                    <h4><i class="fa-solid fa-clipboard-question" style="color: var(--primary); margin-right: 10px;"></i>Who is PersonaPulse for?</h4>
+                    <p>It is best suited for agencies, growth teams, researchers, PR operators, and anyone who needs faster profile-level insight from Reddit activity.</p>
+                </div>
+                <div class="glass-panel faq-item">
+                    <h4><i class="fa-solid fa-rocket" style="color: var(--secondary); margin-right: 10px;"></i>What do waitlist members get?</h4>
+                    <p>Early access opportunities, product updates, and a chance to influence the roadmap as new research and intelligence features are released.</p>
+                </div>
+                <div class="glass-panel faq-item">
+                    <h4><i class="fa-solid fa-users-viewfinder" style="color: var(--tertiary); margin-right: 10px;"></i>Is this only for marketing teams?</h4>
+                    <p>No. The product is useful for outreach, creator vetting, audience research, trust analysis, community monitoring, and rapid-response workflows.</p>
+                </div>
+                <div class="glass-panel faq-item">
+                    <h4><i class="fa-solid fa-stopwatch" style="color: #ffbd2e; margin-right: 10px;"></i>Why join now instead of later?</h4>
+                    <p>Early users help shape the highest-value workflows first and get priority when private beta access and new modules become available.</p>
                 </div>
             </div>
         </div>
