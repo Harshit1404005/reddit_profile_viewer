@@ -170,9 +170,15 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-            title: Text(
-              'SubSonar',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SUBSONAR',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
+                ),
+                const Text('REDDIT INTELLIGENCE ENGINE', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
+              ],
             ),
             actions: [
               if (MediaQuery.of(context).size.width < 600)

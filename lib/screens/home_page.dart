@@ -74,13 +74,19 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: null,
-            title: Text(
-              'SUBSONAR',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.primary,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w900,
-                  ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'SUBSONAR',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.primary,
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const Text('REDDIT INTELLIGENCE ENGINE', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
+              ],
             ),
             centerTitle: true,
             actions: [
