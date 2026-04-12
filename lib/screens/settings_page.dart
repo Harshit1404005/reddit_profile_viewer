@@ -68,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 32),
             Text('ABOUT', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
-            const Text('PERSONAPULSE v1.0.4', style: TextStyle(fontSize: 10, letterSpacing: 2, color: AppTheme.onSurfaceVariant)),
+            const Text('SUBSONAR v1.0.4', style: TextStyle(fontSize: 10, letterSpacing: 2, color: AppTheme.onSurfaceVariant)),
           ],
         ),
       ),

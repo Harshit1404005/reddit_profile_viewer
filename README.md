@@ -1,61 +1,111 @@
-# RedIntel Insights 📊
-### Deep Reddit Analytics & Audience Intelligence
+# PersonaPulse
 
-**RedIntel** is a professional-grade Audience Intelligence platform designed to transform fragmented Reddit data into structured, actionable behavioral dossiers. Built for analysts, researchers, and community managers who require deep-profile visibility, demographic scoring, and high-fidelity reporting, all within a stunning, fluid UI experience.
+Behavioral signals and profile intelligence for Reddit accounts, built with Flutter.
 
----
+`PersonaPulse` is a cross-platform Reddit profile analysis app with a premium dashboard UI, profile history views, cached research logs, and a branded landing page. The repo package slug is still `reddit_profile_viewer`, but the current product identity in the app and website is `PersonaPulse`.
 
-## ⚡ Core Analytical Capabilities
+## What It Does
 
-### 1. Unified Sourcing Engine (Multi-Node Extraction)
-RedIntel aggregates complex user history by utilizing a parallel data-fetch pipeline:
-- **Proxy Intelligence**: Custom Cloudflare Worker infrastructure that dynamically aggregates and load-balances data nodes.
-- **Archive Deep-Scan**: Direct integration with legacy historical archives to provide a complete picture of a user's historical engagement.
-- **Dynamic Synthesizers**: Graceful fallback strategies that synthesize data from official API gateways when necessary.
+- Search a Reddit username and generate a profile dashboard
+- Pull recent posts and comments from multiple data sources
+- Calculate lightweight profile signals such as toxicity and controversial activity
+- Save profile history locally with Hive
+- Show a global Community Pulse with trending keywords and subreddits
+- Export profile dossiers as PDF
+- Run across Android, iOS, Windows, Linux, macOS, and web
 
-### 2. Live Behavioral Synthesis
-The engine performs real-time analytics without writing to disk (unless persistent history is requested):
-- **Activity Intensity Mapping**: A dynamic histogram instantly calculates activity commitment and time-based engagement patterns over the past 30 days.
-- **Sector Engagement**: Real-time percentage breakdowns of the communities and subreddits a user interacts with the most, clustered by interest.
-- **Tone & Interaction Radar**: Automated analysis of sentiment, controversial engagement, and interaction tone to categorize community participation style.
+## Project Structure
 
-### 3. Community Pulse Engine
-A real-time macro-view of the platform's ecosystem:
-- Automatically tracks **Trending Topics** and **Active Subreddits** globally.
-- Interfaces directly with the Cloudflare Proxy to pool live network intelligence and trending research vectors.
-- Live-updating global sentiment indices for market research.
+- `lib/`: Flutter application code
+- `lib/screens/`: splash, home, scanning, dashboard, history, signals, and settings screens
+- `lib/services/`: Reddit fetching, cache, and dossier generation services
+- `website/`: standalone marketing landing page for PersonaPulse
+- `test/`: Flutter tests
 
-### 4. Intelligence Dashboard (Premium UI)
-Built with fluid animations and a modern Crystalline Glassmorphism aesthetic:
-- **Reactive Data Timelines**: Instantly filter hundreds of posts and comments using the built-in audience research search engine.
-- **Seamless Navigation**: Context-jump instantly between your global Research Logs to an in-depth profile Dashboard.
-- **Persistent Preferences**: Localized Hive storage ensures UI and privacy toggles (like turning off local logging) survive app restarts.
-- **Export Engine**: Generate agency-standard PDF analysis reports at the touch of a button.
+## Tech Stack
 
----
+- Flutter
+- Dart
+- Dio
+- Hive / Hive Flutter
+- Flutter Animate
+- Google Fonts
+- PDF / Printing
+- Font Awesome Flutter
 
-## 🛠 Technical Stack
-- **Framework**: Flutter (Cross-platform pure Dart implementation)
-- **State & Persistence**: Hive (Lightning-fast NoSQL Binary Storage)
-- **Networking**: Dio (Advanced HTTP Interceptors) & Custom Cloudflare Worker Proxies
-- **Reporting**: PDF & Printing (Agency-grade research reporting)
-- **Design System**: Flutter Animate (Fluid Dashboard HUD)
+## Branding
 
----
+- Product name: `PersonaPulse`
+- App window title: `PersonaPulse Insights`
+- Website title/tagline: `PersonaPulse | Behavioral Signals for Reddit Profiles`
+- Internal package slug: `reddit_profile_viewer`
 
-## 🚀 Getting Started
+If you plan to publish this app, the next cleanup step should be renaming package identifiers consistently across Android, iOS, web manifest, and desktop targets.
 
-1. **Infrastructure Prep**: Deploy the RedIntel Cloudflare Worker proxy (`hg140400.workers.dev` pattern) for deep data processing and Community Pulse signals.
-2. **Execution**:
-   ```bash
-   flutter pub get
-   flutter run -d windows
-   ```
+## Getting Started
 
----
+### 1. Install dependencies
 
-## 🔒 Legal & Compliance
-RedIntel is designed as a **Data Synthesis and Research Viewer** for public and archived information. It adheres to platform policies by providing an analytical view of publicly available open-source data. Use responsibly in accordance with digital research ethics.
+```bash
+flutter pub get
+```
 
----
-**REDINTEL v1.0.4** | *Data-Driven Audience Research*
+### 2. Configure environment variables
+
+Create a `.env` file in the project root. You can start from `.env.template`.
+
+Expected variables:
+
+```env
+REDDIT_CLIENT_ID=your_client_id_here
+REDDIT_CLIENT_SECRET=your_client_secret_here
+REDDIT_USER_AGENT=android:reddit_scope:v1.0.0 (by /u/your_username)
+```
+
+### 3. Run the app
+
+```bash
+flutter run
+```
+
+Examples:
+
+```bash
+flutter run -d windows
+flutter run -d chrome
+flutter run -d android
+```
+
+## Data Sources
+
+The app currently supports multiple service modes behind `RedditService.create()`:
+
+- public Reddit endpoints
+- OAuth-based Reddit access
+- archive/proxy-assisted mode
+
+The default service configuration lives in `lib/services/reddit_service.dart`.
+
+## Website Assets
+
+The landing page lives in `website/index.html`.
+
+Current brand assets:
+
+- `website/assets/personapulse-mark.svg`
+- `website/assets/personapulse-logo.svg`
+
+## Development Notes
+
+- Local cache is initialized through `CacheService`
+- The app theme is defined in `AppTheme`
+- Some repo files still contain older names such as `RedIntel` or `RedditScope`
+- This README reflects the latest public-facing branding, not every legacy internal string
+
+## Compliance
+
+Use the app responsibly and review Reddit's API, data use, and trademark policies before distributing or commercializing it. Avoid implying affiliation with Reddit.
+
+## Status
+
+PersonaPulse is still in active development, so expect ongoing branding cleanup, service refinements, and package identifier changes.

@@ -30,7 +30,7 @@ class RedditScopeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PersonaPulse Insights',
+      title: 'SubSonar Insights',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const MainOrchestrator(),

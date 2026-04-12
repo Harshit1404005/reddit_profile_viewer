@@ -6,7 +6,7 @@ Reddit is a goldmine for B2B leads and influencer marketing, but the anonymity m
 
 Traditional social listening tools tell you *how many* people are talking. I wanted to build a tool that tells you exactly *who* is talking. 
 
-It's called PersonaPulse. It’s an intelligence engine designed to instantly scan a Reddit user's entire lifespan and aggregate their behavioral signals. 
+It's called SubSonar. It’s an intelligence engine designed to instantly scan a Reddit user's entire lifespan and aggregate their behavioral signals. 
 * PR Crisis Management: Instantly uncover a user's real agenda and history.
 * Influencer Vetting: Ensure absolute brand safety with built-in AI toxicity and NSFW-content radars.
 * B2B Lead Gen: Reverse-engineer your most lucrative leads by finding out exactly what tech tools they complain about on weekends.
@@ -25,7 +25,7 @@ Hey everyone! 👋
 
 I noticed marketers and founders spend hours manually scrolling through Reddit profiles trying to figure out if a user is a genuine B2B lead, a coordinated troll, or a brand-safe influencer. 
 
-I’m currently building PersonaPulse, an intelligence engine that turns chaotic, anonymous Reddit behavior into crystal-clear demographic profiles instantly. 
+I’m currently building SubSonar, an intelligence engine that turns chaotic, anonymous Reddit behavior into crystal-clear demographic profiles instantly. 
 
 With 1 combined search you get:
 🔍 Deep Profile Scanning (even deleted/archived history)

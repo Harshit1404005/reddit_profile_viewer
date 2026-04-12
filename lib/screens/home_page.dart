@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
             elevation: 0,
             leading: null,
             title: Text(
-              'PERSONAPULSE',
+              'SUBSONAR',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppTheme.primary,
                     letterSpacing: 2,
@@ -393,7 +393,7 @@ class _HomePageState extends State<HomePage> {
     ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0);
   }
 
-  Widget _buildToggleButton(String label, bool active, IconData icon, VoidCallback onTap) {
+  Widget _buildToggleButton(String label, bool active, FaIconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(26),
@@ -459,7 +459,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFeatureRow(BuildContext context, IconData icon, String title, Color color) {
+  Widget _buildFeatureRow(BuildContext context, FaIconData icon, String title, Color color) {
     return Row(
       children: [
         Container(
@@ -468,7 +468,7 @@ class _HomePageState extends State<HomePage> {
           child: FaIcon(icon, color: color, size: 16)
         ),
         const SizedBox(width: 16),
-        Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1, color: AppTheme.textPrimary))),
+        Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1, color: AppTheme.onSurface))),
       ],
     );
   }

@@ -171,7 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
             title: Text(
-              'PersonaPulse',
+              'SubSonar',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
             ),
             actions: [
