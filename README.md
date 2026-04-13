@@ -1,46 +1,66 @@
-# PersonaPulse
+# SubVetter
 
-Behavioral signals and profile intelligence for Reddit accounts, built with Flutter.
+**Discover & Qualify Reddit Leads Instantly.**
 
-`PersonaPulse` is a cross-platform Reddit profile analysis app with a premium dashboard UI, profile history views, cached research logs, and a branded landing page. The repo package slug is still `reddit_profile_viewer`, but the current product identity in the app and website is `PersonaPulse`.
+SubVetter is a professional Audience Intelligence and Lead Qualification platform built with Flutter. It helps B2B founders, sales teams, and researchers sift through the noise of Reddit to identify high-intent leads and verify community trust.
+
+The repo package slug is `reddit_profile_viewer`, but the current product identity in the app and website is `SubVetter`.
 
 ## What It Does
 
-- Search a Reddit username and generate a profile dashboard
-- Pull recent posts and comments from multiple data sources
-- Calculate lightweight profile signals such as toxicity and controversial activity
-- Save profile history locally with Hive
-- Show a global Community Pulse with trending keywords and subreddits
-- Export profile dossiers as PDF
-- Run across Android, iOS, Windows, Linux, macOS, and web
+- **Audience Vetting**: Scan entire subreddits (r/SaaS, r/Crypto) to identify the most active and qualified members.
+- **Lead Discovery**: Automatically extract a shortlist of high-intent "veteran" leads from community activity.
+- **Deep Profile Scanning**: Snapshot a Reddit username and generate a full lead report dashboard.
+- **Lead Watchlist**: Monitor high-value potential customers or competitors over time with dedicated tracking.
+- **Communication Tone & Intent**: Analyze a user's communication style and "community fit" to inform outreach strategies.
+- **Shareable Lead Reports**: Export profile summaries as professional PDFs.
+- **Local Intelligence Cache**: All research is stored locally using Hive for instant offline access.
 
 ## Project Structure
 
-- `lib/`: Flutter application code
-- `lib/screens/`: splash, home, scanning, dashboard, history, signals, and settings screens
-- `lib/services/`: Reddit fetching, cache, and dossier generation services
-- `website/`: standalone marketing landing page for PersonaPulse
-- `test/`: Flutter tests
+```
+lib/
+├── main.dart
+├── models/
+│   └── reddit_models.dart      # Unified data models for Profiles & Audience Intel
+├── screens/
+│   ├── splash_page.dart        # Premium entry splash
+│   ├── home_page.dart          # Search Entry & System Telemetry
+│   ├── audience_page.dart      # [NEW] Subreddit Research & Lead Discovery
+│   ├── watchlist_page.dart     # [NEW] Monitored Leads & High-Value Targets
+│   ├── dashboard_page.dart     # Full Lead Qualification Report
+│   ├── history_page.dart       # Local Intelligence History
+│   └── settings_page.dart      # App Preferences
+├── services/
+│   ├── reddit_service.dart     # Parallel Multi-Source Data Engine
+│   ├── cache_service.dart      # Persistent Hive storage & Telemetry
+│   └── report_service.dart     # [NEW] Professional PDF PDF Generation
+├── widgets/
+│   └── navigation_shell.dart   # Dashboard Navigation Shell
+└── theme/
+    └── app_theme.dart          # Cyber-Dark B2B Theme
+website/
+├── index.html                  # Convering Landing Page (subvetter.online)
+└── assets/                     # Branding assets and screenshots
+```
 
 ## Tech Stack
 
-- Flutter
-- Dart
-- Dio
-- Hive / Hive Flutter
-- Flutter Animate
-- Google Fonts
-- PDF / Printing
-- Font Awesome Flutter
+- **Flutter** - High-performance cross-platform UI
+- **Dart** - Fast programming language for intelligence gathering
+- **Dio** - Resilient HTTP client with parallel request handling
+- **Hive / Hive Flutter** - Ultra-fast local NoSQL database
+- **Flutter Animate** - Micro-animations for a premium feel
+- **Google Fonts (Inter & Space Grotesk)** - Modern B2B typography
+- **PDF / Printing** - Professional report generation
+- **Font Awesome Flutter** - Extensive iconography
 
-## Branding
+## Branding & Identity
 
-- Product name: `PersonaPulse`
-- App window title: `PersonaPulse Insights`
-- Website title/tagline: `PersonaPulse | Behavioral Signals for Reddit Profiles`
-- Internal package slug: `reddit_profile_viewer`
-
-If you plan to publish this app, the next cleanup step should be renaming package identifiers consistently across Android, iOS, web manifest, and desktop targets.
+- **Product Name**: `SubVetter`
+- **Domain**: `subvetter.online`
+- **Tagline**: `Reddit Lead Qualification`
+- **Package Slug**: `reddit_profile_viewer`
 
 ## Getting Started
 
@@ -52,60 +72,34 @@ flutter pub get
 
 ### 2. Configure environment variables
 
-Create a `.env` file in the project root. You can start from `.env.template`.
+Create a `.env` file in the project root.
 
 Expected variables:
 
 ```env
 REDDIT_CLIENT_ID=your_client_id_here
 REDDIT_CLIENT_SECRET=your_client_secret_here
-REDDIT_USER_AGENT=android:reddit_scope:v1.0.0 (by /u/your_username)
+REDDIT_USER_AGENT=android:subvetter:v1.0.5 (by /u/Harshit1404005)
 ```
 
 ### 3. Run the app
 
 ```bash
-flutter run
+flutter run -d windows  # Recommended for development
+flutter run -d chrome   # For web testing
 ```
 
-Examples:
+## Intelligence Data Engine
 
-```bash
-flutter run -d windows
-flutter run -d chrome
-flutter run -d android
-```
-
-## Data Sources
-
-The app currently supports multiple service modes behind `RedditService.create()`:
-
-- public Reddit endpoints
-- OAuth-based Reddit access
-- archive/proxy-assisted mode
-
-The default service configuration lives in `lib/services/reddit_service.dart`.
-
-## Website Assets
-
-The landing page lives in `website/index.html`.
-
-Current brand assets:
-
-- `website/assets/personapulse-mark.svg`
-- `website/assets/personapulse-logo.svg`
-
-## Development Notes
-
-- Local cache is initialized through `CacheService`
-- The app theme is defined in `AppTheme`
-- Some repo files still contain older names such as `RedIntel` or `RedditScope`
-- This README reflects the latest public-facing branding, not every legacy internal string
+SubVetter uses a parallel fetch strategy to bypass standard profile limitations:
+1. **Public Reddit API**: Real-time signals for visible profiles.
+2. **Reddit Archive Proxy**: Deep archive retrieval for hidden or "ghost" profiles.
+3. **Old Reddit Layer**: Bypasses certain UI-based rate limits and visual restrictions.
 
 ## Compliance
 
-Use the app responsibly and review Reddit's API, data use, and trademark policies before distributing or commercializing it. Avoid implying affiliation with Reddit.
+Use SubVetter responsibly. This tool is designed for **Market Research and Lead Qualification**. Always respect Reddit's Developer Terms and the privacy of individual community members.
 
 ## Status
 
-PersonaPulse is still in active development, so expect ongoing branding cleanup, service refinements, and package identifier changes.
+**SubVetter v1.0.5** is in active development. Current focus is on **Deep Audience Intelligence** and **Automated Intent Detection**.
