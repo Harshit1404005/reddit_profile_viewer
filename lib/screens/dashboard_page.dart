@@ -176,10 +176,10 @@ class _DashboardPageState extends State<DashboardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'SUBSONAR',
+                  'SUBVETTER',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.primary, letterSpacing: 2),
                 ),
-                const Text('REDDIT INTELLIGENCE ENGINE', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
+                const Text('REDDIT LEAD QUALIFICATION', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
               ],
             ),
             actions: [

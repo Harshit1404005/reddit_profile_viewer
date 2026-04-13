@@ -78,14 +78,14 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'SUBSONAR',
+                  'SUBVETTER',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: AppTheme.primary,
                         letterSpacing: 2,
                         fontWeight: FontWeight.w900,
                       ),
                 ),
-                const Text('REDDIT INTELLIGENCE ENGINE', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
+                const Text('REDDIT LEAD QUALIFICATION', style: TextStyle(fontSize: 9, color: AppTheme.onSurfaceVariant, letterSpacing: 1.5)),
               ],
             ),
             centerTitle: true,

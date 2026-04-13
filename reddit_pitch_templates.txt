@@ -20,7 +20,7 @@ Be brutal: I built a tool that helps B2B founders qualify Reddit leads in 5 seco
 BODY:
 Hey guys, 
 
-I'm an indie dev building SubSonar. 
+I'm an indie dev building SubVetter. 
 
 I’ve always thought Reddit was a goldmine for finding high-intent leads, but manually scrolling through someone's history to see if they are a real founder you should DM or just a time-waster takes way too long. 
 
@@ -82,11 +82,11 @@ Hey IH!
 
 I noticed a huge problem: Marketers and founders know Reddit is a goldmine, but standard social listening tools only tell you *how many* people are talking. They don't tell you *who* is talking. 
 
-I decided to build SubSonar: A tool that takes chaotic, anonymous Reddit behavior and turns it into clean customer personas. (Useful for brand vetting, moderation, or just validating B2B leads). 
+I decided to build SubVetter: A tool that takes chaotic, anonymous Reddit behavior and turns it into clean customer personas. (Useful for brand vetting, moderation, or just validating B2B leads). 
 
 I just bought the domain and threw up the waitlist landing page today. 
 
 My biggest fear right now is positioning. Does this sound like a tool you would use to validate if a Reddit user is worth reaching out to? 
 
 Would love any feedback on the landing page copy!
-Link: subsonar.online
+Link: subvetter.online
