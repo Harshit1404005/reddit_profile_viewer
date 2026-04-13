@@ -5,9 +5,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../models/reddit_models.dart';
 
-class DossierService {
+class ReportService {
   /// Entry point: Generates the full PDF byte stream for a profile.
-  static Future<Uint8List> generateDossier(RedditProfile profile) async {
+  static Future<Uint8List> generateReport(RedditProfile profile) async {
     final pdf = pw.Document(
       title: 'RedIntel Profile Report: u/${profile.username}',
       author: 'RedIntel Analysis Engine',
@@ -127,7 +127,7 @@ class DossierService {
 
   /// Behavioral Signals List
   static pw.Widget _buildSignalsSection(RedditProfile profile, pw.Font font, pw.Font bold) {
-    // Generate some mock signals based on the profile data for the dossier
+    // Generate some mock signals based on the profile data for the report
     final signals = [
       if (profile.totalKarma > 10000) 'High Influence: Subject possesses significant community engagement records.',
       if (profile.nsfw > 0.5) 'Sensitive Discovery: History contains adult-oriented material.',

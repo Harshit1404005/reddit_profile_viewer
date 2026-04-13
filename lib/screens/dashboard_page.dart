@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 import '../models/reddit_models.dart';
 import '../services/reddit_service.dart';
-import '../services/dossier_service.dart';
+import '../services/report_service.dart';
 import 'package:printing/printing.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -104,7 +104,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  Future<void> _exportDossier() async {
+  Future<void> _exportReport() async {
     if (_currentProfile == null) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -116,11 +116,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     try {
-      final pdfBytes = await DossierService.generateDossier(_currentProfile!);
-      await Printing.layoutPdf(
-        onLayout: (format) => pdfBytes,
-        name: 'Dossier_${_currentProfile!.username}.pdf',
-      );
+      final pdfBytes = await ReportService.generateReport(_currentProfile!);
+      if (pdfBytes.isNotEmpty) {
+        await Printing.sharePdf(
+          bytes: pdfBytes,
+          name: 'Report_${_currentProfile!.username}.pdf',
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,21 +185,23 @@ class _DashboardPageState extends State<DashboardPage> {
             actions: [
               if (MediaQuery.of(context).size.width < 600)
                 IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.download, size: 18, color: AppTheme.primary),
-                  onPressed: _exportDossier,
+                  icon: const Icon(Icons.file_download_outlined),
+                  tooltip: 'Export Lead Report',
+                  onPressed: _exportReport,
                 )
               else ...[
                 _buildNavAction('Home'),
                 _buildNavAction('History'),
                 _buildNavAction('Settings'),
                 const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _exportDossier,
+                ElevatedButton.icon(
+                  onPressed: _exportReport,
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: const Text('GENERATE REPORT'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryContainer, 
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Export', style: TextStyle(color: AppTheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
                 ),
               ],
             ],
@@ -390,7 +394,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         spacing: 24,
                         runSpacing: 12,
                         children: [
-                          _buildRiskTag('INTENSE', hasData && _currentProfile!.toxicity > 0.5 ? 'MODERATE' : 'NONE', AppTheme.tertiary),
+                          _buildRiskTag('TONE', hasData && _currentProfile!.toxicity > 0.5 ? 'INTENSE' : 'NEUTRAL', AppTheme.tertiary),
                           _buildRiskTag('SENSITIVE', hasData && _currentProfile!.nsfw > 0.5 ? 'DETECTED' : 'NONE', AppTheme.tertiary),
                           _buildRiskTag('DIVISIVE', hasData && _currentProfile!.controversialIndex > 0.3 ? 'MEDIUM' : 'LOW', AppTheme.secondary),
                         ],
