@@ -203,6 +203,25 @@ class _DashboardPageState extends State<DashboardPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
+                const SizedBox(width: 8),
+                StatefulBuilder(builder: (context, setState) {
+                  final inWatchlist = CacheService.isInWatchlist(_currentProfile!.username);
+                  return IconButton(
+                    icon: Icon(
+                      inWatchlist ? Icons.visibility : Icons.visibility_outlined,
+                      color: inWatchlist ? AppTheme.primary : AppTheme.onSurfaceVariant,
+                    ),
+                    tooltip: inWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist',
+                    onPressed: () async {
+                      if (inWatchlist) {
+                        await CacheService.removeFromWatchlist(_currentProfile!.username);
+                      } else {
+                        await CacheService.addToWatchlist(_currentProfile!.username);
+                      }
+                      setState(() {});
+                    },
+                  );
+                }),
               ],
             ],
           ),

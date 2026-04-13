@@ -70,6 +70,9 @@ abstract class RedditService {
   /// Fetches global community pulse (trends).
   Future<Map<String, dynamic>> getGlobalPulse();
 
+  /// Fetches depth-based intelligence for a specific subreddit.
+  Future<SubredditIntelligence> analyzeSubreddit(String subreddit, {bool deepScan = false});
+
   /// Shared intelligence scoring.
   RedditProfile calculateIntelligence(
     RedditProfile profile,
@@ -209,6 +212,111 @@ class PullPushRedditService extends RedditService {
       };
     }
   }
+
+  @override
+  Future<SubredditIntelligence> analyzeSubreddit(String subreddit, {bool deepScan = false}) async {
+    final sw = Stopwatch()..start();
+    final sub = subreddit.replaceAll('r/', '');
+
+    // 1 ── Fetch Raw Data (Posts + Comments)
+    // Fast Scan: 1 page (50 items)
+    // Deep Scan: 5 pages (250 items)
+    final int limit = deepScan ? 100 : 50;
+    final int pages = deepScan ? 5 : 1;
+    
+    List<dynamic> allChildren = [];
+    String? after;
+
+    try {
+      for (int i = 0; i < pages; i++) {
+        final url = '/r/$sub/hot.json?limit=$limit${after != null ? '&after=$after' : ''}';
+        final response = await _reddit.get(url);
+        final data = response.data['data'];
+        allChildren.addAll(data['children']);
+        after = data['after'];
+        if (after == null) break;
+        if (deepScan) await Future.delayed(const Duration(milliseconds: 500)); // Respect rate limits
+      }
+    } catch (e) {
+      debugPrint('[SubVetter] Subreddit Fetch Error: $e');
+    }
+
+    // 2 ── Extraction & Aggregation
+    final userFrequency = <String, int>{};
+    final keywords = <String, int>{};
+    int totalComments = 0;
+    int sentimentScore = 0;
+
+    for (final child in allChildren) {
+      final d = child['data'];
+      final author = d['author'] ?? '[deleted]';
+      if (author != '[deleted]') {
+        userFrequency[author] = (userFrequency[author] ?? 0) + 1;
+      }
+
+      final title = (d['title'] ?? '').toString().toLowerCase();
+      final body = (d['selftext'] ?? '').toString().toLowerCase();
+      final combinedText = '$title $body';
+      
+      // Intent/Sentiment Detection
+      if (combinedText.contains(RegExp(r'help|how to|recommend|suggest|need advice', caseSensitive: false))) sentimentScore++;
+      if (combinedText.contains(RegExp(r'trash|bad|terrible|broken|fail', caseSensitive: false))) sentimentScore--;
+
+      final words = combinedText.split(RegExp(r'\W+'));
+      for (final w in words) {
+        if (w.length > 5 && !_isCommonWord(w)) {
+          keywords[w] = (keywords[w] ?? 0) + 1;
+        }
+      }
+      totalComments += (d['num_comments'] as num?)?.toInt() ?? 0;
+    }
+
+    // 3 ── Lead Ranking
+    // Pick the top 5 most frequent/active users and run a light vetting.
+    final topUserEntries = userFrequency.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    final candidateUsernames = topUserEntries.take(10).map((e) => e.key).toList();
+    final List<RedditProfile> leads = [];
+
+    // For the PoC, we just return empty profiles with the usernames 
+    // to avoid a recursive blizzard of API calls. The UI can then trigger 
+    // a deep-vet on demand.
+    for (final uname in candidateUsernames) {
+      leads.add(RedditProfile(
+        username: uname,
+        totalKarma: 0,
+        accountAge: 'Active',
+        status: 'DISCOVERED',
+        toxicity: 0,
+        nsfw: 0,
+        controversialIndex: 0,
+        recentPosts: [],
+        recentComments: [],
+      ));
+    }
+
+    final topKeyEntries = keywords.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    sw.stop();
+    debugPrint('[SubVetter] Subreddit Analysis Complete for r/$sub (${sw.elapsed.inMilliseconds}ms)');
+
+    return SubredditIntelligence(
+      subredditName: 'r/$sub',
+      sentiment: sentimentScore > 5 ? 'BULLISH' : (sentimentScore < -2 ? 'FRUSTRATED' : 'NEUTRAL'),
+      topKeywords: topKeyEntries.take(8).map((e) => e.key).toList(),
+      qualifiedLeads: leads.take(5).toList(),
+      activeUsersCount: userFrequency.length,
+      scanDepth: deepScan ? 'DEEP' : 'FAST',
+    );
+  }
+
+  bool _isCommonWord(String word) {
+    const common = {'reddit', 'people', 'really', 'thanks', 'working', 'everything', 'looking'};
+    return common.contains(word.toLowerCase());
+  }
+
 
   @override
   Future<RedditProfile> analyzeUser(String username) async {

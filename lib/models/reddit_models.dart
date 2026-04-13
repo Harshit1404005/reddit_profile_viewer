@@ -282,3 +282,28 @@ String _formatTime(num? createdUtc) {
   final years = (diff.inDays / 365).floor();
   return '${years}y ago';
 }
+
+@HiveType(typeId: 3)
+class SubredditIntelligence {
+  @HiveField(0)
+  final String subredditName;
+  @HiveField(1)
+  final String sentiment;
+  @HiveField(2)
+  final List<String> topKeywords;
+  @HiveField(3)
+  final List<RedditProfile> qualifiedLeads;
+  @HiveField(4)
+  final int activeUsersCount;
+  @HiveField(5)
+  final String scanDepth; // "FAST" or "DEEP"
+
+  SubredditIntelligence({
+    required this.subredditName,
+    required this.sentiment,
+    required this.topKeywords,
+    required this.qualifiedLeads,
+    required this.activeUsersCount,
+    required this.scanDepth,
+  });
+}

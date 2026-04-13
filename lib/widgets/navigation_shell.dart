@@ -4,7 +4,8 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_panel.dart';
 import '../screens/home_page.dart';
 import '../screens/history_page.dart';
-import '../screens/signals_page.dart';
+import '../screens/audience_page.dart';
+import '../screens/watchlist_page.dart';
 import '../screens/settings_page.dart';
 
 import '../models/reddit_models.dart';
@@ -35,8 +36,9 @@ class _NavigationShellState extends State<NavigationShell> {
     super.initState();
     _pages = [
       HomePage(onSearch: widget.onSearch),
+      AudiencePage(onViewProfile: widget.onViewProfile),
+      WatchlistPage(onViewProfile: widget.onViewProfile),
       HistoryPage(onViewProfile: widget.onViewProfile, onReScan: widget.onReScan),
-      SignalsPage(),
       SettingsPage(),
     ];
   }
@@ -63,10 +65,11 @@ class _NavigationShellState extends State<NavigationShell> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(context, 0, FontAwesomeIcons.magnifyingGlass, 'SEARCH'),
-            _buildNavItem(context, 1, FontAwesomeIcons.clockRotateLeft, 'HISTORY'),
-            _buildNavItem(context, 2, FontAwesomeIcons.chartLine, 'TRENDS'),
-            _buildNavItem(context, 3, FontAwesomeIcons.gear, 'SETTINGS'),
+            _buildNavItem(context, 0, FontAwesomeIcons.magnifyingGlass, 'VET'),
+            _buildNavItem(context, 1, FontAwesomeIcons.usersViewfinder, 'AUDIENCE'),
+            _buildNavItem(context, 2, FontAwesomeIcons.binoculars, 'WATCHLIST'),
+            _buildNavItem(context, 3, FontAwesomeIcons.clockRotateLeft, 'HISTORY'),
+            _buildNavItem(context, 4, FontAwesomeIcons.gear, 'SETTINGS'),
           ],
         ),
       ),

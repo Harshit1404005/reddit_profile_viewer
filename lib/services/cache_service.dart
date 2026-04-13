@@ -107,4 +107,37 @@ class CacheService {
     final meta = Hive.box(metaBoxName);
     return meta.get('settings_$key', defaultValue: defaultValue) as T;
   }
+
+  // ─── Watchlist (Market Monitoring) ──────────────────────────────────────────
+
+  static const String watchlistKey = 'watchlist_v1';
+
+  /// Get the current list of monitored usernames
+  static List<String> getWatchlist() {
+    final meta = Hive.box(metaBoxName);
+    return (meta.get(watchlistKey, defaultValue: []) as List).cast<String>();
+  }
+
+  /// Add a user to the tracking watchlist
+  static Future<void> addToWatchlist(String username) async {
+    final meta = Hive.box(metaBoxName);
+    final list = getWatchlist();
+    if (!list.contains(username.toLowerCase())) {
+      list.add(username.toLowerCase());
+      await meta.put(watchlistKey, list);
+    }
+  }
+
+  /// Remove a user from tracking
+  static Future<void> removeFromWatchlist(String username) async {
+    final meta = Hive.box(metaBoxName);
+    final list = getWatchlist();
+    list.remove(username.toLowerCase());
+    await meta.put(watchlistKey, list);
+  }
+
+  /// Check if a user is on the watchlist
+  static bool isInWatchlist(String username) {
+    return getWatchlist().contains(username.toLowerCase());
+  }
 }
