@@ -131,10 +131,10 @@ export default function Dashboard() {
             <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-slate-200 trust-card">
                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Performance Breakdown</h3>
                <div className="space-y-6">
-                  <MetricBar label="Product Quality" value={intel?.details.quality || 0} color="bg-indigo-600" />
-                  <MetricBar label="Value for Money" value={intel?.details.value || 0} color="bg-emerald-500" />
-                  <MetricBar label="Shipping & Logistics" value={intel?.details.shipping || 0} color="bg-blue-500" />
-                  <MetricBar label="Customer Support" value={intel?.details.support || 0} color="bg-amber-500" />
+                  <MetricBar label="Product Quality" value={intel?.details?.quality || 0} color="bg-indigo-600" />
+                  <MetricBar label="Value for Money" value={intel?.details?.value || 0} color="bg-emerald-500" />
+                  <MetricBar label="Shipping & Logistics" value={intel?.details?.shipping || 0} color="bg-blue-500" />
+                  <MetricBar label="Customer Support" value={intel?.details?.support || 0} color="bg-amber-500" />
                </div>
             </div>
 
@@ -250,17 +250,39 @@ export default function Dashboard() {
 }
 
 function LoadingState() {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const messages = [
+    "Initializing secure e-commerce proxy...",
+    "Retrieving top 50 customer reviews...",
+    "Normalizing sentiment vectors...",
+    "Synthesizing AI SWOT Intelligence...",
+    "Finalizing Strategic Roadmap..."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIdx((prev) => (prev + 1) % messages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [messages.length]);
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8">
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+        animate={{ 
+          rotate: 360,
+          scale: [1, 1.1, 1]
+        }}
+        transition={{ 
+          rotate: { repeat: Infinity, duration: 2, ease: "linear" },
+          scale: { repeat: Infinity, duration: 2, ease: "easeInOut" }
+        }}
         className="mb-8"
       >
-        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full" />
+        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full shadow-lg shadow-indigo-600/20" />
       </motion.div>
-      <h2 className="text-2xl font-display font-bold text-slate-900 mb-2">Synthesizing Product Pulse</h2>
-      <p className="text-slate-500 font-medium">Aggregating reviews from Amazon & Shopify stores...</p>
+      <h2 className="text-2xl font-display font-bold text-slate-900 mb-2">Analyzing Product Pulse</h2>
+      <p className="text-slate-500 font-medium h-6">{messages[msgIdx]}</p>
     </div>
   );
 }

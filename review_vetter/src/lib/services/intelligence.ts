@@ -1,5 +1,17 @@
 import { MessageSquare, ThumbsUp, ThumbsDown, Target, Zap } from "lucide-react";
 
+/**
+ * Normalization Mapping for Apify Amazon Scraper
+ */
+export interface ApifyAmazonReview {
+  reviewTitle: string;
+  reviewDescription: string;
+  reviewRatingStars: number;
+  reviewerName: string;
+  reviewDate: string;
+  productAsin: string;
+}
+
 export type Sentiment = "BULLISH" | "FRUSTRATED" | "NEUTRAL" | "STABLE";
 
 export interface Review {
@@ -76,7 +88,6 @@ export class IntelligenceService {
     const strengths = topKeywords.slice(0, 3);
     const weaknesses = topKeywords.slice(3, 6);
 
-    sw.stop();
 
     return {
       productName,
@@ -128,5 +139,55 @@ export class IntelligenceService {
 
     const target = product === "NONE" ? products.IPHONE : products[product];
     return this.analyzeReviews(target.name, target.reviews);
+  }
+
+  /**
+   * Triggers an Apify scraper for a given URL and returns the normalized reviews.
+   */
+  static async fetchRealReviews(url: string, token: string): Promise<Review[]> {
+    console.log(`[Apify] Starting scraper for: ${url}`);
+    
+    // 1 ── Start Global Amazon Scraper (compass/amazon-reviews-scraper)
+    const runResponse = await fetch(`https://api.apify.com/v2/acts/compass~amazon-reviews-scraper/runs?token=${token}`, {
+      method: "POST",
+      body: JSON.stringify({
+        productUrls: [{ url }],
+        maxReviews: 50,
+        sort: "helpful",
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!runResponse.ok) throw new Error("Failed to trigger Apify scraper.");
+    const runData = await runResponse.json();
+    const datasetId = runData.data.defaultDatasetId;
+
+    // 2 ── Poll for Completion (Wait up to 45 seconds)
+    let finished = false;
+    let attempts = 0;
+    while (!finished && attempts < 15) {
+      const statusRes = await fetch(`https://api.apify.com/v2/acts/compass~amazon-reviews-scraper/runs/${runData.data.id}?token=${token}`);
+      const statusData = await statusRes.json();
+      if (statusData.data.status === "SUCCEEDED") {
+        finished = true;
+      } else {
+        await new Promise(r => setTimeout(r, 3000));
+        attempts++;
+      }
+    }
+
+    // 3 ── Fetch Dataset Items
+    const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${token}`);
+    const items: ApifyAmazonReview[] = await dataRes.json();
+
+    return items.map((item, i) => ({
+      id: `${item.productAsin}-${i}`,
+      rating: item.reviewRatingStars || 5,
+      title: item.reviewTitle || "Review",
+      body: item.reviewDescription || "",
+      author: item.reviewerName || "Amazon Customer",
+      date: item.reviewDate || new Date().toISOString(),
+      source: "AMAZON"
+    }));
   }
 }
