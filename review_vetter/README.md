@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ReviewVetter 🛡️ | E-commerce Intelligence Suite
 
-## Getting Started
+**ReviewVetter** is a high-performance, AI-driven intelligence platform designed for e-commerce owners, marketers, and product managers. It transforms raw, fragmented customer reviews from **Amazon, Shopify, Walmart, and Trustpilot** into actionable strategic assets.
 
-First, run the development server:
+Built for the "Growth Era," ReviewVetter uses **Gemini 1.5 Flash** to provide deep psychological insights and ROI-based math that standard analytics tools miss, all while running on a highly cost-efficient Edge infrastructure.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Core Functionalities
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Deep AI Intelligence Engine (The "Vetter Score")
+- **Psychological Synthesis**: Moves beyond simple keyword tags to understand the *why* behind customer sentiment.
+- **Ground Truth Scoring**: The **Vetter Score (0-100)** is anchored in real numerical data (average star ratings and distribution) to prevent AI hallucination.
+- **SWOT Audit Matrices**: Instantly generates Strengths, Weaknesses, Opportunities, and Threats for any product link.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. ROI-Based Marketing & Profit Tools
+- **Revenue Leakage Calculator**: Identifies specific product flaws causing returns or lost sales.
+- **Interactive ROI Math**: Visualizes potential MRR recovery with a custom revenue-based calculator on the dashboard and landing page.
+- **Ad Creative Studio**: Extracts high-converting ad hooks for **Meta** and **TikTok** directly from qualitative customer evidence.
+- **Smart Reply Drafts**: AI-drafted responses to top customer triggers, optimized for engagement and resolution.
 
-## Learn More
+### 3. Multi-Source Scraping Agents
+- **Autonomous Crawlers**: Integrated with Apify agents to pull fresh review data from:
+  - **Amazon** (Global support)
+  - **Shopify** (Direct products and store links)
+  - **Walmart**
+  - **Trustpilot** (Brand reputation level)
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Market Advantage & Intelligence Board
+- **Side-by-Side Comparison**: Compare your product against any competitor to find where to "steal" market share.
+- **Intelligence Board (Workspace)**: A persistent dashboard to save, manage, and track strategic audits over time.
+- **Battlecards**: Specific tactical action points on where you win and where you are vulnerable.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Professional Reporting
+- **Strategic Evolution Roadmaps**: A 5-step growth plan with Impact vs. Effort ratings.
+- **PDF Export**: Generate professional, brand-locked strategic audit reports for stakeholders or clients instantly.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Framework**: Next.js 16 (App Router / Turbopack)
+- **AI Brain**: Google Gemini 1.5 Flash
+- **Infrastructure**: Cloudflare Pages (Edge Runtime)
+- **Deployment Adapter**: OpenNext for Cloudflare
+- **Database & Auth**: Supabase
+- **Styling**: Tailwind CSS 4 + Framer Motion (Premium Design System)
+- **Reporting**: jsPDF
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ⚙️ Setup & Deployment
+
+### 1. Local Development
+1. **Clone & Install**: `npm install`
+2. **Environment Variables**: Create `.env.local` with your Gemini, Apify, and Supabase keys.
+3. **Run Dev**: `npm run dev`
+
+### 2. Supabase Migration
+You MUST run the `supabase_migration.sql` script in your Supabase SQL Editor. This initializes the `scraped_reviews` table required for the caching layer.
+
+### 3. Cloudflare Deployment
+ReviewVetter is optimized for the Cloudflare Edge runtime using **OpenNext**.
+1. **Build**: `npm run build:cf`
+2. **Deploy**: `npm run deploy` (requires Wrangler CLI)
+*Alternatively, connect your repository to Cloudflare Pages and set the build command to `npm run build:cf` with the output directory to `.open-next`.*
+
+---
+
+## 💡 Cost Optimization & Scale
+ReviewVetter is architected for zero-burn scalability:
+- **72-Hour Intelligent Caching**: All product analyses are cached in Supabase. Repeat queries for the same product consume **zero** API credits.
+- **Live Demo Mode**: High-fidelity pre-scraped reports (e.g., YETI Tumbler) allow users to experience the tool without triggering API costs.
+- **Edge Native**: Runs entirely on Cloudflare Workers/Pages for global speed and minimal hosting cost.
+
+---
+
+## 🛡️ Data Privacy
+- **Public Data Only**: ReviewVetter strictly analyzes publicly available review data.
+- **GDPR Compliant**: No PII (Personally Identifiable Information) of consumers is stored. Only data-driven intelligence is saved in our database.
+
+---
+
+*Built for Growth Founders by ReviewVetter Intelligence Inc.*

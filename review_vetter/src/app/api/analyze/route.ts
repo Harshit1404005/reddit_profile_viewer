@@ -1,41 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
 import { IntelligenceService } from "@/lib/services/intelligence";
 
+export const runtime = "edge";
+
 export async function POST(req: NextRequest) {
   try {
-    const { url } = await req.json();
+    const { url, competitorUrl, isComparison, isDemo } = await req.json();
     const token = process.env.APIFY_TOKEN;
+
+    // 0 ── Handle Demo Mode
+    if (isDemo) {
+      const demoIntel = await IntelligenceService.fetchDemoReport("yeti-rambler");
+      return NextResponse.json({ type: "SINGLE", ...demoIntel });
+    }
 
     if (!url) {
       return NextResponse.json({ error: "Product URL is required" }, { status: 400 });
     }
 
-    // 1 ── Determine if we can do a REAL analysis
-    const isAmazon = url.toLowerCase().includes("amazon.");
-    
-    if (isAmazon && token) {
-      try {
-        const reviews = await IntelligenceService.fetchRealReviews(url, token);
-        const productName = url.split("/dp/")[0]?.split("/").pop()?.replace(/-/g, " ") || "Product Scan";
-        const intel = IntelligenceService.analyzeReviews(productName, reviews);
-        return NextResponse.json(intel);
-      } catch (e) {
-        console.error("Real Analysis Failed, falling back to mock:", e);
-      }
+    if (isComparison && !competitorUrl) {
+      return NextResponse.json({ error: "Competitor URL is required for comparison mode" }, { status: 400 });
     }
 
-    // 2 ── Fallback: Determine product type from URL (Simulated for MVP)
-    let type: "IPHONE" | "DYSON" | "NONE" = "NONE";
-    if (url.toLowerCase().includes("iphone")) type = "IPHONE";
-    if (url.toLowerCase().includes("dyson") || url.toLowerCase().includes("airwrap")) type = "DYSON";
+    const analyzeUrl = async (targetUrl: string) => {
+      const isAmazon = targetUrl.toLowerCase().includes("amazon.");
+      const isWalmart = targetUrl.toLowerCase().includes("walmart.");
+      const isTrustpilot = targetUrl.toLowerCase().includes("trustpilot.");
+      const isShopify = targetUrl.toLowerCase().includes("myshopify.com") || targetUrl.toLowerCase().includes("/products/"); // Basic heuristic
+    
+      // 1 ── CRITICAL: Check Cache First BEFORE triggering expensive Apify
+      const cached = await IntelligenceService.checkCache(targetUrl);
+      if (cached) return cached;
 
-    // Simulate Network Latency for "Wait" experience
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (token) {
+        try {
+          let reviews: any[] = [];
+          let pName = "Product Scan";
 
-    // Get Intelligence
-    const intel = IntelligenceService.getMockIntelligence(type);
+          if (isAmazon) {
+            reviews = await IntelligenceService.fetchRealReviews(targetUrl, token);
+            pName = targetUrl.split("/dp/")[0]?.split("/").pop()?.replace(/-/g, " ") || "Amazon Product";
+          } else if (isWalmart) {
+            reviews = await IntelligenceService.fetchWalmartReviews(targetUrl, token);
+            pName = "Walmart Product";
+          } else if (isTrustpilot) {
+            reviews = await IntelligenceService.fetchTrustpilotReviews(targetUrl, token);
+            pName = targetUrl.split("/review/")[1]?.split("/")[0] || "Trustpilot Brand";
+          } else if (isShopify) {
+            reviews = await IntelligenceService.fetchShopifyReviews(targetUrl, token);
+            pName = targetUrl.split("/products/")[1]?.split("/")[0]?.replace(/-/g, " ") || "Shopify Product";
+          }
 
-    return NextResponse.json(intel);
+          if (reviews.length > 0) {
+            return await IntelligenceService.analyzeReviews(pName, reviews, targetUrl);
+          }
+        } catch (e) {
+          console.error(`Analysis failed for ${targetUrl}:`, e);
+        }
+      }
+
+      throw new Error("Analysis failed. No data retrieved.");
+    };
+
+    if (isComparison) {
+      // Parallel Run for both products
+      const [subject, competitor] = await Promise.all([
+        analyzeUrl(url),
+        analyzeUrl(competitorUrl)
+      ]);
+
+      const comparison = IntelligenceService.generateComparison(subject, competitor);
+      return NextResponse.json({ type: "COMPARISON", ...comparison });
+    }
+
+    const intel = await analyzeUrl(url);
+    return NextResponse.json({ type: "SINGLE", ...intel });
+
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
